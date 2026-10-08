@@ -1,0 +1,293 @@
+openapi: 3.1.0
+info:
+  title: Vaultline EDMS API
+  version: 1.0.0-draft
+  description: |
+    Public REST API for the Enterprise Document Management System.
+    The web application uses this same API. All endpoints enforce RBAC + folder/document ACLs.
+    Every call that reads or changes a document writes an audit event.
+servers:
+  - url: https://edms.example.com/v1
+security:
+  - oauth2: []
+  - apiKey: []
+tags:
+  - name: Folders
+  - name: Documents
+  - name: Uploads
+  - name: Versions
+  - name: Search
+  - name: Workflows
+  - name: Records
+  - name: Audit
+  - name: Webhooks
+paths:
+  /folders:
+    get:
+      tags: [Folders]
+      summary: List folders (tree, permission-trimmed)
+      parameters:
+        - { name: parentId, in: query, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Folder' } } } } }
+    post:
+      tags: [Folders]
+      summary: Create folder (optionally from a folder template)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, parentId]
+              properties:
+                name: { type: string }
+                parentId: { type: string }
+                templateId: { type: string }
+      responses:
+        '201': { description: Created }
+  /uploads:
+    post:
+      tags: [Uploads]
+      summary: Start an upload. Validates the folder upload policy and returns presigned multipart URLs.
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UploadRequest' }
+      responses:
+        '201': { description: Upload session, content: { application/json: { schema: { $ref: '#/components/schemas/UploadSession' } } } }
+        '422': { description: Policy violation, content: { application/json: { schema: { $ref: '#/components/schemas/PolicyViolation' } } } }
+  /uploads/{uploadId}/complete:
+    post:
+      tags: [Uploads]
+      summary: Commit an upload — creates the document (or a new version) and queues scan/OCR/index
+      parameters: [ { $ref: '#/components/parameters/uploadId' } ]
+      responses:
+        '201': { description: Document created, content: { application/json: { schema: { $ref: '#/components/schemas/Document' } } } }
+  /documents/{documentId}:
+    get:
+      tags: [Documents]
+      summary: Get document with metadata, status, retention and current version
+      parameters: [ { $ref: '#/components/parameters/documentId' } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Document' } } } }
+        '404': { description: Not found or no access (indistinguishable by design) }
+    delete:
+      tags: [Documents]
+      summary: Delete (soft) — blocked with 409 if on legal hold or under retention
+      parameters: [ { $ref: '#/components/parameters/documentId' } ]
+      responses:
+        '204': { description: Deleted }
+        '409': { description: On legal hold / retention not expired }
+  /documents/{documentId}/metadata:
+    patch:
+      tags: [Documents]
+      summary: Update metadata (validated against the document type schema; previous values kept)
+      parameters: [ { $ref: '#/components/parameters/documentId' } ]
+      requestBody:
+        content: { application/json: { schema: { type: object, additionalProperties: true } } }
+      responses:
+        '200': { description: Updated }
+        '422': { description: Validation error }
+  /documents/{documentId}/content:
+    get:
+      tags: [Documents]
+      summary: Get a short-lived (60s) presigned download URL for a version
+      parameters:
+        - { $ref: '#/components/parameters/documentId' }
+        - { name: version, in: query, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { url: { type: string }, expiresAt: { type: string, format: date-time } } } } } }
+  /documents/{documentId}/versions:
+    get:
+      tags: [Versions]
+      summary: List versions
+      parameters: [ { $ref: '#/components/parameters/documentId' } ]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Version' } } } } }
+  /documents/{documentId}/versions/{versionId}/restore:
+    post:
+      tags: [Versions]
+      summary: Restore a previous version (creates a new version; history is never rewritten)
+      parameters:
+        - { $ref: '#/components/parameters/documentId' }
+        - { name: versionId, in: path, required: true, schema: { type: string } }
+      responses:
+        '201': { description: New version created }
+  /documents/{documentId}/compare:
+    get:
+      tags: [Versions]
+      summary: Compare two versions (text diff + metadata diff)
+      parameters:
+        - { $ref: '#/components/parameters/documentId' }
+        - { name: from, in: query, required: true, schema: { type: string } }
+        - { name: to, in: query, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Diff }
+  /search:
+    post:
+      tags: [Search]
+      summary: Full-text + metadata search (permission-trimmed in the engine)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                q: { type: string, example: indemnity }
+                folderId: { type: string }
+                includeSubfolders: { type: boolean, default: true }
+                documentTypes: { type: array, items: { type: string } }
+                dateFrom: { type: string, format: date }
+                dateTo: { type: string, format: date }
+                metadata: { type: object, additionalProperties: true, example: { counterparty: Northwind Logistics LLC } }
+                page: { type: integer, default: 1 }
+                pageSize: { type: integer, default: 25, maximum: 100 }
+      responses:
+        '200': { description: Results with highlights and facets }
+  /workflows:
+    post:
+      tags: [Workflows]
+      summary: Route a document version for approval (template or ad-hoc reviewers)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documentId]
+              properties:
+                documentId: { type: string }
+                templateId: { type: string }
+                reviewers: { type: array, items: { type: string } }
+                message: { type: string }
+      responses:
+        '201': { description: Workflow started }
+  /tasks/{taskId}/decision:
+    post:
+      tags: [Workflows]
+      summary: Approve, reject or request changes on a workflow step
+      parameters: [ { name: taskId, in: path, required: true, schema: { type: string } } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [approve, reject, request_changes] }
+                comment: { type: string, description: Required for reject and request_changes }
+      responses:
+        '200': { description: Recorded }
+  /legal-holds:
+    post:
+      tags: [Records]
+      summary: Place a legal hold on documents, folders or a saved search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [matterRef, reason, scope]
+              properties:
+                matterRef: { type: string }
+                reason: { type: string }
+                custodianId: { type: string }
+                scope:
+                  type: object
+                  properties:
+                    documentIds: { type: array, items: { type: string } }
+                    folderIds: { type: array, items: { type: string } }
+                    savedSearchId: { type: string }
+      responses:
+        '201': { description: Hold placed }
+  /retention-rules:
+    get:
+      tags: [Records]
+      summary: List retention rules
+      responses: { '200': { description: OK } }
+  /audit-events:
+    get:
+      tags: [Audit]
+      summary: Query the audit log (Admin, Records Manager, Auditor)
+      parameters:
+        - { name: actorId, in: query, schema: { type: string } }
+        - { name: resourceId, in: query, schema: { type: string } }
+        - { name: action, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/AuditEvent' } } } } }
+  /webhooks:
+    post:
+      tags: [Webhooks]
+      summary: Register a webhook endpoint (payloads signed with HMAC-SHA256)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, events]
+              properties:
+                url: { type: string, format: uri }
+                events: { type: array, items: { type: string, enum: [document.created, document.updated, document.deleted, version.created, workflow.started, workflow.step_completed, workflow.approved, workflow.rejected, hold.placed, hold.released, disposition.executed] } }
+      responses:
+        '201': { description: Registered; signing secret returned once }
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://edms.example.com/oauth/token
+          scopes: { documents:read: Read, documents:write: Write, search: Search, workflows: Workflows, records: Records management, audit:read: Audit log }
+        authorizationCode:
+          authorizationUrl: https://edms.example.com/oauth/authorize
+          tokenUrl: https://edms.example.com/oauth/token
+          scopes: { documents:read: Read, documents:write: Write, search: Search }
+    apiKey: { type: apiKey, in: header, name: X-API-Key }
+  parameters:
+    documentId: { name: documentId, in: path, required: true, schema: { type: string } }
+    uploadId: { name: uploadId, in: path, required: true, schema: { type: string } }
+  schemas:
+    Folder:
+      type: object
+      properties: { id: { type: string }, name: { type: string }, parentId: { type: string }, uploadPolicyId: { type: string }, path: { type: string } }
+    UploadRequest:
+      type: object
+      required: [folderId, filename, size]
+      properties:
+        folderId: { type: string }
+        documentId: { type: string, description: Set to upload a new version of an existing document }
+        filename: { type: string }
+        size: { type: integer }
+        mimeType: { type: string }
+        documentType: { type: string }
+        metadata: { type: object, additionalProperties: true }
+    UploadSession:
+      type: object
+      properties:
+        uploadId: { type: string }
+        parts: { type: array, items: { type: object, properties: { partNumber: { type: integer }, url: { type: string } } } }
+        expiresAt: { type: string, format: date-time }
+    PolicyViolation:
+      type: object
+      properties:
+        policy: { type: string, example: Contracts — strict }
+        violations: { type: array, items: { type: object, properties: { field: { type: string }, rule: { type: string }, message: { type: string } } } }
+    Document:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        folderId: { type: string }
+        documentType: { type: string }
+        status: { type: string, enum: [processing, active, in_review, approved, rejected, archived] }
+        metadata: { type: object, additionalProperties: true }
+        currentVersion: { $ref: '#/components/schemas/Version' }
+        retainUntil: { type: string, format: date, nullable: true }
+        onLegalHold: { type: boolean }
+    Version:
+      type: object
+      properties: { id: { type: string }, label: { type: string, example: '3.0' }, sha256: { type: string }, size: { type: integer }, mimeType: { type: string }, changeNote: { type: string }, createdBy: { type: string }, createdAt: { type: string, format: date-time } }
+    AuditEvent:
+      type: object
+      properties: { id: { type: integer }, occurredAt: { type: string, format: date-time }, actorId: { type: string }, actorIp: { type: string }, action: { type: string }, resourceType: { type: string }, resourceId: { type: string }, details: { type: object }, hash: { type: string }, prevHash: { type: string } }

@@ -197,6 +197,42 @@ ins{background:var(--pos-bg);color:var(--pos);text-decoration:none}
 .hide-role{display:none!important}
 @media (max-width:1100px){.g4{grid-template-columns:1fr 1fr}.docv{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
 @media (max-width:860px){.app{grid-template-columns:1fr;grid-template-rows:auto 1fr}.side{flex-direction:row;align-items:center;border-right:0;border-bottom:1px solid var(--border);overflow-x:auto;min-width:0}.side .brand{padding:10px 12px;flex:none}.side .brand small{display:none}.nav{display:flex;flex:none;padding:6px;gap:2px}.nav h6{display:none}.nav a{white-space:nowrap}.me{border:0;flex:none;padding:8px 12px}.me .av,.me .who div{display:none}.top .btn.primary{padding:8px 10px}.kbd{display:none}.main{min-height:0}.tabs,.card{min-width:0}.card{overflow-x:auto}.head .row{width:100%}.view{min-width:0}.docv>div,.repo>div,.srch>div{min-width:0}.paper{padding:12px;min-height:0}.page{padding:24px 18px}.page .stamp{right:14px;top:14px}.repo,.srch,.g2,.g3{grid-template-columns:1fr}.view{padding:20px 16px 50px}.top{padding:0 16px}.proto{display:none}.cmp{grid-template-columns:1fr}}
+
+/* overview + tour */
+.ov{max-width:1040px}
+.ov-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:end;padding-bottom:26px;border-bottom:1px solid var(--border);margin-bottom:28px}
+.ov-hero h1{font-size:34px;line-height:1.1;text-wrap:balance}
+.ov-hero p{color:var(--text-2);margin-top:12px;max-width:60ch;font-size:15px}
+.ov-hero .who{display:flex;gap:12px;align-items:center;margin-top:18px;font-size:13px;color:var(--text-2)}
+.ov-cta{display:flex;flex-direction:column;gap:10px;background:var(--muted);border:1px solid var(--border);border-radius:12px;padding:18px}
+.ov-cta b{font-size:13px}.ov-cta span{font-size:12.5px;color:var(--text-3)}
+.ov h2.sec{font:700 19px var(--display);letter-spacing:-.01em;margin:34px 0 4px}
+.ov p.lead{color:var(--text-3);margin-bottom:14px}
+.reqs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.reqs .card{padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.reqs .n{font:600 11px var(--mono);color:var(--text-3);letter-spacing:.04em}
+.reqs h3{font:600 15px var(--font);color:var(--text-strong)}
+.reqs ul{margin:0 0 0 16px;color:var(--text-2);font-size:13px;display:grid;gap:2px}
+.reqs .row{margin-top:auto;padding-top:6px}
+.tbl{overflow-x:auto}
+.ms td:last-child,.ms th:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ms tfoot td{font-weight:700;border-top:1px solid var(--border)}
+.tour{position:fixed;left:16px;bottom:calc(78px + env(safe-area-inset-bottom,0px));width:318px;max-width:calc(100vw - 32px);background:var(--surface);border:1px solid var(--border-strong);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.22);z-index:70;padding:16px 18px;display:none}
+.tour.show{display:block}
+.tour .tp{display:flex;justify-content:space-between;align-items:center;font:600 11px var(--mono);color:var(--text-3);letter-spacing:.04em;margin-bottom:6px}
+.tour .bar2{height:3px;background:var(--sunken);border-radius:2px;margin-bottom:12px}.tour .bar2 i{display:block;height:100%;background:var(--signal);border-radius:2px;transition:width .3s}
+.tour h3{font:700 16px var(--display);color:var(--text-strong);margin-bottom:4px}
+.tour p{font-size:13px;color:var(--text-2)}
+.tour .req-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--info-text);background:var(--signal-subtle);border-radius:99px;padding:2px 8px;margin-bottom:8px}
+.tour .do{margin-top:10px;font-size:12.5px;background:var(--muted);border:1px solid var(--border-subtle);border-radius:8px;padding:8px 10px;color:var(--text)}
+.tour .do b{color:var(--text-strong)}
+.tour .nav2{display:flex;gap:8px;margin-top:14px;align-items:center}
+.tour-hl{outline:3px solid var(--signal)!important;outline-offset:3px;border-radius:8px;animation:pulse 1.6s ease-out 2}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(11,99,229,.45)}100%{box-shadow:0 0 0 14px rgba(11,99,229,0)}}
+@media (prefers-reduced-motion:reduce){.tour-hl{animation:none}}
+.tourbtn{display:flex;align-items:center;gap:8px;margin:8px 10px 2px;padding:9px 12px;border-radius:8px;background:var(--signal);color:#fff;font-weight:600;font-size:13px;justify-content:center}
+.tourbtn:hover{filter:brightness(1.08)}
+@media (max-width:860px){.ov-hero{grid-template-columns:1fr}.ov-hero h1{font-size:27px}.reqs{grid-template-columns:1fr}.tour{right:16px;left:16px;width:auto;bottom:calc(12px + env(safe-area-inset-bottom,0px))}.tourbtn{margin:0 6px;white-space:nowrap;padding:7px 10px}}
 </style>
 <div class="app">
   <aside class="side">
@@ -236,6 +272,7 @@ ins{background:var(--pos-bg);color:var(--pos);text-decoration:none}
 </div>
 
 <div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+<div class="tour" id="tour" role="dialog" aria-live="polite"></div>
 <div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg><span></span></div>
 
 <script>
@@ -295,12 +332,13 @@ const ft=t=>`<span class="ft ${t}">${t.toUpperCase().slice(0,4)}</span>`;
 function renderNav(cur){
   const pend=DOCS.filter(d=>d.status==='pending').length+2;
   const items=[
-    ['h','Workspace'],['dashboard','Dashboard','dash'],['repository','Repository','folder'],['search','Search','search'],['approvals','Approvals','check',pend],
+    ['h','Proposal'],['overview','Your EDMS proposal','log'],
+    ['h','Live demo'],['dashboard','Dashboard','dash'],['repository','Repository','folder'],['search','Search','search'],['approvals','Approvals','check',pend],
     ['h','Governance'],['records','Records & holds','archive',null,can.records],['audit','Audit log','log',null,can.audit],
     ['h','Settings'],['admin','Administration','gear',null,can.admin],['api','API & integrations','api',null,can.admin]
   ];
-  document.getElementById('nav').innerHTML=items.map(i=>{
-    if(i[0]==='h')return`<h6>${i[1]}</h6>`;
+  document.getElementById('nav').innerHTML='<button class="tourbtn" onclick="startTour(0)">▶ Take the 3-minute tour</button>'+items.map(i=>{
+    if(i[0]==='h'){const idx=items.indexOf(i);let k=idx+1,any=false;while(k<items.length&&items[k][0]!=='h'){if(!items[k][4]||items[k][4]())any=true;k++}return any?`<h6>${i[1]}</h6>`:''}
     if(i[4]&&!i[4]())return'';
     return`<a href="#${i[0]}" class="${cur===i[0]?'active':''}">${svg(i[2])}${i[1]}${i[3]?`<span class="count">${i[3]}</span>`:''}</a>`;
   }).join('');
@@ -653,10 +691,81 @@ V.api=()=>can.admin()?`<div class="head"><div><h1>API & integrations</h1><p clas
 X-Vaultline-Signature: t=1791531005,v1=5d1e…  <span class="c"># HMAC-SHA256</span>
 { <span class="s">"event"</span>: <span class="s">"workflow.approved"</span>, <span class="s">"documentId"</span>: <span class="s">"D-10477"</span>, <span class="s">"version"</span>: <span class="s">"1.0"</span>, <span class="s">"erpRef"</span>: <span class="s">"SAP-5100049921"</span> }</div></div></div>`:'<div class="empty">Requires the Admin role.</div>';
 
+
+V.overview=()=>`<div class="ov">
+ <div class="ov-hero"><div>
+   <div class="badge b-info plain" style="margin-bottom:12px">Discovery MVP · built for your job post</div>
+   <h1>Enterprise Document Management System — proposal &amp; working prototype</h1>
+   <p>Instead of a cover letter, this is a clickable version of the system you described, plus the proposal you asked for: scope, UI flow, stack, timeline, pricing, security and assumptions. Everything below maps to your brief, in your order.</p>
+   <div class="who"><div class="av">AB</div><div><b style="color:var(--text)">Aliyan Baig</b> · Software architect, Netdrix</div></div>
+ </div>
+ <div class="ov-cta"><b>Fastest way to review</b><span>A guided tour walks through every requirement in about 3 minutes. It opens each screen and shows what to click.</span><button class="btn primary" onclick="startTour(0)" style="justify-content:center">▶ Start the guided tour</button><a href="https://github.com/namistech/edms-mvp" target="_blank" rel="noopener" style="font-size:12.5px;text-align:center">Full proposal documents on GitHub →</a></div>
+ </div>
+
+ <h2 class="sec">Your 8 requirements, and where to see them</h2>
+ <p class="lead">Sample data only. Use the role switcher (bottom-left) to see the system as Admin, Manager, User or Viewer.</p>
+ <div class="reqs"><div class="card"><div class="n">01</div><h3>Document repository & organization</h3><ul><li>Central cloud repository (S3, encrypted)</li><li>Folder templates lock standard structures</li><li>Scans (PDF, TIFF) + Office files, images, email</li><li>Single + bulk upload, resumable</li><li>Policy rules: required metadata before saving</li></ul><div class="row"><button class="btn sm primary" onclick="startTour(2)">Show me in the demo →</button></div></div><div class="card"><div class="n">02</div><h3>Metadata & indexing</h3><ul><li>Admin-configurable fields per document type</li><li>Date, type, department, reference no. (auto-sequence)…</li><li>Every field is filterable and searchable</li></ul><div class="row"><button class="btn sm primary" onclick="startTour(3)">Show me in the demo →</button></div></div><div class="card"><div class="n">03</div><h3>Search</h3><ul><li>Full-text across Word/Excel/PDF and OCR’d scans</li><li>Filters: date range, metadata, folder, type</li><li>Permission-trimmed inside the search engine</li></ul><div class="row"><button class="btn sm primary" onclick="startTour(4)">Show me in the demo →</button></div></div><div class="card"><div class="n">04</div><h3>Version control & audit trail</h3><ul><li>Immutable versions, view / restore</li><li>Side-by-side compare with text + metadata diff</li><li>Every action logged: who, what, when, IP — hash-chained</li></ul><div class="row"><button class="btn sm primary" onclick="startTour(5)">Show me in the demo →</button></div></div><div class="card"><div class="n">05</div><h3>Approval workflows</h3><ul><li>Linear templates: Legal → Finance → MD</li><li>Pending / Approved / Rejected / Changes requested</li><li>Email + in-app notifications, SLA reminders</li></ul><div class="row"><button class="btn sm primary" onclick="startTour(7)">Show me in the demo →</button></div></div><div class="card"><div class="n">06</div><h3>Security & access control</h3><ul><li>Roles: Admin, Records Mgr, Manager, User, Viewer, Auditor</li><li>Folder + document ACLs with explicit deny</li><li>AES-256 at rest, TLS 1.3, SSO + MFA</li></ul><div class="row"><button class="btn sm primary" onclick="startTour(8)">Show me in the demo →</button></div></div><div class="card"><div class="n">07</div><h3>Records management & archival</h3><ul><li>Retention rules by type / folder / metadata</li><li>Legal hold blocks deletion (storage-level lock)</li><li>Defensible deletion with certificate; legacy migration</li></ul><div class="row"><button class="btn sm primary" onclick="startTour(9)">Show me in the demo →</button></div></div><div class="card"><div class="n">08</div><h3>Integrations</h3><ul><li>Documented REST API (OpenAPI 3.1)</li><li>OAuth2 clients + signed webhooks</li><li>CRM / ERP pattern (e.g. SAP, Salesforce)</li></ul><div class="row"><button class="btn sm primary" onclick="startTour(10)">Show me in the demo →</button></div></div></div>
+
+ <h2 class="sec">Wireframes &amp; UI/UX approach</h2>
+ <p class="lead">Familiar file-explorer layout so training is near zero; policies enforced at upload; one page per document with preview, metadata, versions, workflow and activity; compliance visible only as calm status badges. <a href="https://github.com/namistech/edms-mvp/blob/main/docs/02-ux-approach.md" target="_blank" rel="noopener">Read the UX approach →</a></p>
+
+ <h2 class="sec">Recommended technology stack</h2>
+ <p class="lead">Open-source, no licence lock-in, deployable on AWS, Azure or on-premise. .NET is a like-for-like swap if that is your standard. <a href="https://github.com/namistech/edms-mvp/blob/main/docs/04-tech-stack.md" target="_blank" rel="noopener">Why each choice →</a></p>
+ <div class="card tbl"><table><thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead><tbody><tr><td><b>Frontend</b></td><td>Next.js + TypeScript</td><td class="muted">Accessible, fast with large folder trees</td></tr><tr><td><b>Backend API</b></td><td>NestJS (TypeScript)</td><td class="muted">One permission guard on every endpoint</td></tr><tr><td><b>Database</b></td><td>PostgreSQL 16</td><td class="muted">ACID versions & audit; JSONB for configurable metadata</td></tr><tr><td><b>File storage</b></td><td>S3 / MinIO + KMS</td><td class="muted">Encrypted at rest; Object Lock for legal holds</td></tr><tr><td><b>Search</b></td><td>OpenSearch</td><td class="muted">Full-text, facets, highlighting, permission filters</td></tr><tr><td><b>OCR & extraction</b></td><td>OCRmyPDF + Tesseract, Apache Tika</td><td class="muted">Searchable scans; runs inside your environment</td></tr><tr><td><b>Auth</b></td><td>OIDC/SAML SSO + MFA</td><td class="muted">Azure AD, Google or Okta; SCIM provisioning</td></tr></tbody></table></div>
+
+ <h2 class="sec">Timeline &amp; milestone pricing</h2>
+ <p class="lead">Fixed price per milestone, about 16 weeks to production. Each milestone is demoed on staging and paid only when you accept it. You own all code from day one. If you stop after discovery, you keep the full design package.</p>
+ <div class="card tbl"><table class="ms"><thead><tr><th>#</th><th>Milestone</th><th>When</th><th>Price</th></tr></thead><tbody><tr><td class="mono">M0</td><td><b>Discovery & design</b><div class="muted" style="font-size:12px">Workshops, hi-fi designs, taxonomy, final architecture</div></td><td class="muted">Wk 1–2</td><td>$2,400</td></tr><tr><td class="mono">M1</td><td><b>Foundation & security</b><div class="muted" style="font-size:12px">Infra, CI/CD, SSO + MFA, roles & ACL engine, audit chain</div></td><td class="muted">Wk 3–5</td><td>$4,500</td></tr><tr><td class="mono">M2</td><td><b>Repository, metadata & versions</b><div class="muted" style="font-size:12px">Folders, upload + policies, metadata engine, viewer, versions</div></td><td class="muted">Wk 6–8</td><td>$5,500</td></tr><tr><td class="mono">M3</td><td><b>Search & OCR</b><div class="muted" style="font-size:12px">Extraction, OCR, full-text index, facets</div></td><td class="muted">Wk 9–10</td><td>$4,000</td></tr><tr><td class="mono">M4</td><td><b>Workflows & audit</b><div class="muted" style="font-size:12px">Approvals, notifications, audit UI & export</div></td><td class="muted">Wk 11–12</td><td>$4,000</td></tr><tr><td class="mono">M5</td><td><b>Records & migration</b><div class="muted" style="font-size:12px">Retention, legal hold, disposition, 1 legacy source</div></td><td class="muted">Wk 13–14</td><td>$4,200</td></tr><tr><td class="mono">M6</td><td><b>Integrations & launch</b><div class="muted" style="font-size:12px">API, webhooks, 1 CRM/ERP connector, pen test fixes, training</div></td><td class="muted">Wk 15–16</td><td>$4,400</td></tr></tbody><tfoot><tr><td></td><td>Total, including 60-day warranty, hypercare and training</td><td></td><td>$29,000</td></tr></tfoot></table></div>
+ <p class="help" style="margin-top:8px">Hosting, the third-party pen-test fee and paid OCR APIs (if chosen) are billed at cost. <a href="https://github.com/namistech/edms-mvp/blob/main/docs/11-timeline-and-pricing.md" target="_blank" rel="noopener">Full breakdown →</a></p>
+
+ <h2 class="sec">Security, testing &amp; documentation</h2>
+ <div class="grid g3">
+  <div class="card card-b"><h2>Security</h2><p class="muted" style="font-size:13px;margin-top:6px">Deny-by-default roles + folder/document ACLs enforced in the API and in search. AES-256 at rest, TLS 1.3, SSO + MFA. Append-only, hash-chained audit log anchored to WORM storage. Independent pen test before go-live.</p><a href="https://github.com/namistech/edms-mvp/blob/main/docs/06-security.md" target="_blank" rel="noopener" style="font-size:12.5px;display:inline-block;margin-top:8px">Security design →</a></div>
+  <div class="card card-b"><h2>Testing</h2><p class="muted" style="font-size:13px;margin-top:6px">Unit, integration and end-to-end tests; an automated test of every route × every role; load tests (search p95 &lt; 500 ms); OWASP scans; OCR accuracy measured on your own scans; UAT sign-off per milestone.</p><a href="https://github.com/namistech/edms-mvp/blob/main/docs/10-testing-qa.md" target="_blank" rel="noopener" style="font-size:12.5px;display:inline-block;margin-top:8px">Test strategy →</a></div>
+  <div class="card card-b"><h2>Documentation</h2><p class="muted" style="font-size:13px;margin-top:6px">Architecture &amp; decision records, OpenAPI reference + SDKs, deployment runbook, security controls mapping, admin guide, user guide with short video tutorials.</p><a href="https://github.com/namistech/edms-mvp/blob/main/api/openapi.yaml" target="_blank" rel="noopener" style="font-size:12.5px;display:inline-block;margin-top:8px">Starter API spec →</a></div>
+ </div>
+
+ <h2 class="sec">Assumptions &amp; out of scope</h2>
+ <div class="grid g2">
+  <div class="card card-b"><h2>Assumed</h2><ul style="margin:8px 0 0 16px;color:var(--text-2);font-size:13px;display:grid;gap:3px"><li>One organisation, up to ~500 users, ~5M documents</li><li>Your SSO provider (or bundled Keycloak)</li><li>1 legacy source + 1 CRM/ERP connector included</li><li>A product owner and sample scans from your side</li></ul></div>
+  <div class="card card-b"><h2>Out of scope (unless added)</h2><ul style="margin:8px 0 0 16px;color:var(--text-2);font-size:13px;display:grid;gap:3px"><li>Physical scanning service, native mobile apps</li><li>Complex BPMN workflows (linear only, as briefed)</li><li>Qualified e-signatures, Office co-authoring, AI features</li><li>Formal ISO 27001 / SOC 2 certification audits</li></ul></div>
+ </div>
+ <p class="help" style="margin-top:8px"><a href="https://github.com/namistech/edms-mvp/blob/main/docs/12-assumptions-and-out-of-scope.md" target="_blank" rel="noopener">Assumptions + 8 questions for discovery →</a></p>
+
+ <div class="card card-b" style="margin-top:30px;display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:220px"><h2>Next step</h2><p class="muted" style="font-size:13px;margin-top:4px">A 20-minute call to go through this together, then a paid 2-week discovery &amp; design phase.</p></div><button class="btn primary" onclick="startTour(0)">▶ Take the tour</button></div>
+</div>`;
+
+const TOUR=[
+ {req:'Overview',t:'Dashboard',d:'What a user sees every morning: approval tasks, recent documents, and compliance status (audit chain check, records due for deletion).',go:()=>go('dashboard'),hl:'.view .grid.g4'},
+ {req:'01 · Repository & organization',t:'Standardized folders',d:'Folders are created from templates, so every department keeps the same structure. Legal and HR are restricted folders.',go:()=>{curFolder='leg-con';go('repository')},hl:'.tree',todo:'Click any folder on the left to browse it.'},
+ {req:'01 · Policy-based upload',t:'Upload with required metadata',d:'Bulk upload of 3 files. The folder policy blocks saving until every required field is valid. A missing reference number and a TIFF (not allowed in Contracts) are flagged.',go:()=>{go('repository');setTimeout(()=>{openUpload();addFiles()},60)},hl:'#ulist',todo:'Type <b>CON-2026-0118</b> in the red field, click <b>Convert to PDF/A</b>, and watch <b>Save</b> turn on.'},
+ {req:'02 · Metadata & indexing',t:'Configurable metadata',d:'Each document type has its own fields (reference no., counterparty, dates, classification). Admins configure them without code. Every change is versioned.',go:()=>{closeModal();docTab='details';go('doc/D-10482')},hl:'.docv>div:first-child .card'},
+ {req:'03 · Search',t:'Full-text search, including scans',d:'Searching “indemnity” finds text inside Word/PDF files and inside a scanned paper document via OCR. Filters cover type, department, date range, folder and status.',go:()=>{S.q='indemnity';go('search')},hl:'.srch',todo:'Look for the hit marked <b>Scanned · OCR text</b>.'},
+ {req:'04 · Version control',t:'Versions, restore and compare',d:'Every version is immutable. Restoring creates a new version, so history is never overwritten. Compare shows changed clauses and metadata.',go:()=>{docTab='versions';go('doc/D-10482');setTimeout(compare,250)},hl:'.cmp'},
+ {req:'04 · Audit trail',t:'Complete audit log',d:'Every view, download, edit, approval and permission change is recorded with user, time and IP. Entries are hash-chained, so tampering is detectable.',go:()=>{closeModal();go('audit')},hl:'.view .card'},
+ {req:'05 · Approval workflows',t:'Linear approval with sign-off',d:'Legal → Finance Controller → Managing Director. Each step shows its status, and the approval is bound to the exact version approved.',go:()=>{docTab='workflow';go('doc/D-10482')},hl:'.timeline',todo:'Click <b>Approve</b> (top right) to sign off step 2.'},
+ {req:'06 · Security & access control',t:'Role-based access',d:'Switched to a <b>Viewer</b>. Admin and records menus are gone, upload is disabled, the HR folder is hidden, and restricted documents are removed from search results.',go:()=>{setRole('viewer');curFolder='fin-ap';go('repository')},hl:'.nav',todo:'Use the role switcher at the bottom-left to try other roles.'},
+ {req:'07 · Records management',t:'Retention, legal hold, deletion',d:'Retention rules by document type, legal holds that block deletion at the storage layer, and approved deletion with a destruction certificate. Migration dry runs from legacy file shares are on the last tab.',go:()=>{setRole('admin');recTab='holds';go('records')},hl:'.view .card',todo:'Open the <b>Disposition queue</b> and <b>Migration</b> tabs.'},
+ {req:'08 · Integrations',t:'API & integrations',d:'Documented REST API, OAuth2 clients for systems like SAP or Salesforce, and signed webhooks so your ERP hears when a document is approved.',go:()=>go('api'),hl:'.code'},
+ {req:'Proposal',t:'That’s the tour',d:'The rest of the proposal (stack, milestones and pricing, security, testing, assumptions) is on the overview page.',go:()=>{go('overview');setTimeout(()=>{const h=[...document.querySelectorAll('h2.sec')][3];h&&h.scrollIntoView({behavior:'smooth',block:'start'})},120)},hl:null,last:true}
+];
+let tourI=-1;
+function setRole(r){const sel=document.getElementById('role');if(sel.value===r)return;sel.value=r;role=r;const u=USERS[r];document.getElementById('meName').textContent=u[0];document.getElementById('meAv').textContent=u[1];document.querySelectorAll('.role-write').forEach(b=>b.style.display=can.write()?'':'none')}
+function startTour(i){tourI=i;showStep()}
+function endTour(){tourI=-1;document.getElementById('tour').classList.remove('show');document.querySelectorAll('.tour-hl').forEach(e=>e.classList.remove('tour-hl'));setRole('admin');route()}
+function showStep(){
+  const st=TOUR[tourI];document.querySelectorAll('.tour-hl').forEach(e=>e.classList.remove('tour-hl'));
+  st.go();
+  const el=document.getElementById('tour');
+  el.innerHTML=`<div class="tp"><span>STEP ${tourI+1} OF ${TOUR.length}</span><button class="x" style="width:24px;height:24px;font-size:16px" onclick="endTour()" aria-label="Close tour">×</button></div><div class="bar2"><i style="width:${(tourI+1)/TOUR.length*100}%"></i></div><span class="req-tag">${st.req}</span><h3>${st.t}</h3><p>${st.d}</p>${st.todo?`<div class="do">Try it: ${st.todo}</div>`:''}<div class="nav2">${tourI>0?'<button class="btn sm" onclick="tourI--;showStep()">← Back</button>':''}<div class="spacer"></div>${st.last?'<button class="btn sm primary" onclick="endTour()">Finish</button>':'<button class="btn sm primary" onclick="tourI++;showStep()">Next →</button>'}</div>`;
+  el.classList.add('show');
+  if(st.hl)setTimeout(()=>{const t=document.querySelector(st.hl);if(t){t.classList.add('tour-hl');t.scrollIntoView({behavior:'smooth',block:'center'})}},420);
+}
+
 /* ---------------- router ---------------- */
 function route(){
-  const [r,arg]=(location.hash.slice(1)||'dashboard').split('/');
-  const key=V[r]?r:'dashboard';
+  const [r,arg]=(location.hash.slice(1)||'overview').split('/');
+  const key=V[r]?r:'overview';
   renderNav(key==='doc'?'repository':key);
   document.getElementById('view').innerHTML=V[key](arg);
   document.querySelectorAll('.role-write').forEach(b=>b.style.display=can.write()?'':'none');

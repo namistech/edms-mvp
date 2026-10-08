@@ -1,22 +1,28 @@
 # Upwork cover letter
 
-> Paste into the proposal. Replace `[REPO LINK]` and `[VIDEO LINK]`. Keep the first two lines — Upwork shows only those in the preview.
+> Paste into the proposal. Upwork shows only the first two lines in the preview, so keep them as they are.
+> Before sending: open the prototype → Share → set it to "Anyone with the link". Replace [VIDEO LINK] / [REPO LINK] or delete those lines.
 
 ---
 
-Hi — instead of a cover letter, I built you a discovery MVP for this EDMS. 2-min video: [VIDEO LINK] · Repo with clickable prototype + full proposal docs: [REPO LINK]
+Hi! Instead of a cover letter, I built a working prototype of your EDMS. Click through it here: https://claude.ai/artifact/DpLvmCUjXBtir3PVtJaAis
 
-What's in it, mapped to what you asked for:
+2-minute walkthrough: [VIDEO LINK] · Full proposal docs (scope, architecture, security, timeline, pricing): [REPO LINK]
 
-- **Wireframes / UI flow:** a clickable prototype of every main screen — dashboard, repository with folder templates, bulk upload with **policy-enforced required metadata**, document view with **version history, visual compare and restore**, full-text search including **OCR'd scans**, linear approval workflows, **retention / legal hold / defensible deletion**, hash-chained audit log, roles & permissions, and API/webhooks. You can switch roles (Admin → Viewer) and watch menus, folders and search results change.
-- **Scope breakdown:** your 8 feature areas, each split into concrete capabilities, MVP vs Phase 2.
-- **Stack and why:** Next.js + NestJS (TypeScript), PostgreSQL, S3 with KMS encryption and Object Lock, OpenSearch, Tika + OCRmyPDF/Tesseract, SSO + MFA. The docs explain each choice and the alternatives (.NET is fine too if that's your standard).
-- **Security:** deny-by-default RBAC plus folder/document ACLs, enforced in the API **and inside the search engine**, so users never learn that a restricted document exists. AES-256 at rest, TLS 1.3, append-only hash-chained audit with a WORM anchor, and an independent pen test before go-live.
-- **Timeline and price:** paid 2-week discovery & design phase, then 6 fixed-price milestones over ~16 weeks. Every milestone is demoed on staging and released only when you accept it. You own all code from the first commit.
-- **Assumptions and out of scope:** written down, plus 8 questions I'd settle in discovery.
+**What to try in the prototype (about 3 minutes):**
+1. **Upload:** click Upload, then Browse files. The folder's policy blocks saving until the required metadata is filled in. One reference number is wrong and the TIFF file isn't allowed in Contracts, so fix those and Save turns on.
+2. **Versions:** open "Master Services Agreement" → Versions → Compare v2.0 ↔ v3.0 to see the changed clauses and metadata. Restoring a version creates a new one, so history is never overwritten.
+3. **Approvals:** on the same document, click Approve. The decision is tied to that exact version and recorded in the audit log.
+4. **Search:** search "indemnity". One hit comes from a scanned paper document via OCR.
+5. **Access control:** at the bottom left, switch the role from Admin to Viewer. Admin menus, the HR folder and restricted search results disappear completely.
+6. **Records:** go to Records & holds to see retention rules, legal holds, two-person approved deletion and a legacy migration dry run.
 
-About me: I'm a software architect and founder of Netdrix. I design and build end to end — architecture, UI/UX, backend, infrastructure and documentation — with my team covering QA and DevOps. You'd work with one person who owns the whole thing.
+**How I'd build it:** Next.js + NestJS (TypeScript), PostgreSQL, S3 with KMS encryption and Object Lock for legal holds, OpenSearch for full-text search, Tika + OCRmyPDF/Tesseract for scans, and SSO with MFA. Permissions are enforced in the API and inside the search engine, so users never see documents they can't access. The audit log is append-only and hash-chained, and there's an independent pen test before go-live. If .NET is your standard, I'm happy to use it instead.
 
-Happy to start with the discovery phase. A 20-minute call to go through the prototype would be the quickest next step.
+**Plan:** a paid 2-week discovery and design phase, then 6 fixed-price milestones over about 16 weeks ($29,000 total; the breakdown is in the docs). Each milestone is demoed on staging and paid only when you accept it. You own the code from the first commit.
+
+I'm a software architect and the founder of Netdrix. I handle architecture, UI/UX, backend, infrastructure and documentation myself, with my team covering QA and DevOps, so you'd have one point of contact who owns the whole build.
+
+Would a 20-minute call to go through the prototype together work for you?
 
 Aliyan Baig

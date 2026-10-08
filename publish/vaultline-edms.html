@@ -1,0 +1,667 @@
+<title>Vaultline EDMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#fff;--surface:#fff;--muted:#fafafa;--sunken:#f2f2f2;--ink:#000;--ink-hover:#262626;
+  --border:#e5e5e5;--border-subtle:#efefef;--border-strong:#d1d1d1;
+  --text-strong:#000;--text:#121212;--text-2:#424242;--text-3:#757575;
+  --signal:#0b63e5;--signal-subtle:#ebf3ff;
+  --pos:#2f5d5a;--pos-bg:#e8f0ee;--warn:#b45309;--warn-bg:#fff7ed;--danger:#c82626;--danger-bg:#fef2f2;
+  --on-ink:#fff;--info-text:#0a4fb8;--overlay:rgba(0,0,0,.35);--r:10px;--r-sm:6px;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --display:"Inter Tight","Inter",sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--canvas:#0e0f11;--surface:#16171a;--muted:#121316;--sunken:#1f2125;--ink:#f2f2f2;--ink-hover:#d9d9d9;--on-ink:#0e0f11;--border:#2a2c31;--border-subtle:#222428;--border-strong:#3a3d43;--text-strong:#fff;--text:#e8e8e8;--text-2:#bdbdbd;--text-3:#8f8f8f;--signal:#5b9bff;--signal-subtle:#14233d;--info-text:#8ab8ff;--pos:#7fc4b8;--pos-bg:#14302b;--warn:#f0a35a;--warn-bg:#3a2510;--danger:#ff7a7a;--danger-bg:#3a1414;--overlay:rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{--canvas:#0e0f11;--surface:#16171a;--muted:#121316;--sunken:#1f2125;--ink:#f2f2f2;--ink-hover:#d9d9d9;--on-ink:#0e0f11;--border:#2a2c31;--border-subtle:#222428;--border-strong:#3a3d43;--text-strong:#fff;--text:#e8e8e8;--text-2:#bdbdbd;--text-3:#8f8f8f;--signal:#5b9bff;--signal-subtle:#14233d;--info-text:#8ab8ff;--pos:#7fc4b8;--pos-bg:#14302b;--warn:#f0a35a;--warn-bg:#3a2510;--danger:#ff7a7a;--danger-bg:#3a1414;--overlay:rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+html{height:100%}body{height:100%;font:14px/1.5 var(--font);color:var(--text);background:var(--canvas);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+a{color:var(--signal);text-decoration:none}
+.app{display:grid;grid-template-columns:240px 1fr;height:100%}
+/* sidebar */
+.side{border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--muted)}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px}
+.logo{width:28px;height:28px;border-radius:7px;background:#000;display:grid;place-items:center}
+.logo svg{width:16px;height:16px}
+.brand b{font:700 16px var(--display);letter-spacing:-.01em}
+.brand small{display:block;font-size:11px;color:var(--text-3);font-weight:500;letter-spacing:.02em}
+.nav{padding:6px 10px;flex:1;overflow:auto}
+.nav h6{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;padding:14px 10px 6px}
+.nav a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r-sm);color:var(--text-2);font-weight:500}
+.nav a:hover{background:var(--sunken);color:var(--text)}
+.nav a.active{background:var(--surface);color:var(--text-strong);box-shadow:inset 0 0 0 1px var(--border)}
+.nav a svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7}
+.nav .count{margin-left:auto;font-size:11px;background:var(--ink);border-radius:99px;padding:0 7px;line-height:18px;color:var(--on-ink)}
+.me{border-top:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.av{width:30px;height:30px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-size:11px;font-weight:600;flex:none;border:1px solid var(--border)}
+.me select{border:1px solid var(--border-strong);border-radius:var(--r-sm);padding:3px 6px;font-size:12px;background:var(--surface);width:100%}
+.me .who{flex:1;min-width:0}.me .who div{font-weight:600;font-size:13px}
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.top{height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 24px;flex:none}
+.search-top{flex:1;max-width:560px;position:relative}
+.search-top input{width:100%;border:1px solid var(--border-strong);border-radius:8px;padding:8px 12px 8px 34px;background:var(--muted)}
+.search-top svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--text-3);fill:none;stroke-width:2}
+.kbd{font:500 11px var(--mono);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--text-3);background:var(--surface);position:absolute;right:9px;top:50%;transform:translateY(-50%)}
+.proto{font-size:11px;font-weight:600;color:var(--warn);background:var(--warn-bg);padding:4px 9px;border-radius:99px;white-space:nowrap}
+.bell{position:relative;width:34px;height:34px;border-radius:8px;display:grid;place-items:center}
+.bell:hover{background:var(--sunken)}
+.bell svg{width:18px;height:18px;stroke:var(--text-2);fill:none;stroke-width:1.7}
+.bell i{position:absolute;top:7px;right:8px;width:7px;height:7px;background:var(--danger);border-radius:50%;border:2px solid var(--canvas)}
+.view{flex:1;overflow:auto;padding:28px 32px 60px}
+/* common */
+h1{font:700 24px/1.2 var(--display);letter-spacing:-.02em;color:var(--text-strong)}
+h2{font:600 15px var(--font);color:var(--text-strong)}
+.sub{color:var(--text-3);margin-top:4px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;border:1px solid var(--border-strong);background:var(--surface);white-space:nowrap}
+.btn:hover{background:var(--muted)}
+.btn.primary{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
+.btn.primary:hover{background:var(--ink-hover)}
+.btn.danger{color:var(--danger);border-color:#f1c4c4}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.card{border:1px solid var(--border);border-radius:var(--r);background:var(--surface)}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border-subtle)}
+.card-b{padding:16px 18px}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr 1fr}
+.stat .k{font-size:12px;color:var(--text-3);font-weight:500}
+.stat .v{font:700 26px var(--display);letter-spacing:-.02em;margin-top:4px}
+.stat .d{font-size:12px;color:var(--text-3);margin-top:2px}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);font-weight:600;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--muted);white-space:nowrap}
+td.mono,td.muted{white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--border-subtle);vertical-align:middle}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--muted)}
+tr:last-child td{border-bottom:0}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:99px;white-space:nowrap;background:var(--sunken);color:var(--text-2)}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
+.b-pos{background:var(--pos-bg);color:var(--pos)}.b-warn{background:var(--warn-bg);color:var(--warn)}.b-danger{background:var(--danger-bg);color:var(--danger)}.b-info{background:var(--signal-subtle);color:var(--signal)}
+.badge.plain::before{display:none}
+.ft{display:inline-grid;place-items:center;width:32px;height:38px;border-radius:5px;font:700 9px var(--mono);color:#fff;flex:none;position:relative}
+.ft.pdf{background:#c82626}.ft.docx{background:#1f5bd1}.ft.xlsx{background:#1d7a4d}.ft.tif{background:#6b5b4e}.ft.png{background:#7a3fa0}.ft.msg{background:#424242}
+.name{display:flex;align-items:center;gap:12px}
+.name b{font-weight:600;display:block}
+.name small{color:var(--text-3);font-size:12px}
+.muted{color:var(--text-3)}.mono{font-family:var(--mono);font-size:12px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:99px;padding:4px 11px;font-size:12.5px;background:var(--surface);font-weight:500}
+.chip.on{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
+.input,select.input,textarea.input{width:100%;border:1px solid var(--border-strong);border-radius:8px;padding:8px 11px;background:var(--surface)}
+.input.err{border-color:var(--danger);background:var(--danger-bg)}
+label.f{display:block;font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px}
+label.f .req{color:var(--danger)}
+.field{margin-bottom:14px}
+.help{font-size:11.5px;color:var(--text-3);margin-top:4px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tabs button{padding:10px 14px;font-weight:600;color:var(--text-3);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.on{color:var(--text-strong);border-color:var(--ink)}
+.crumbs{display:flex;align-items:center;gap:6px;color:var(--text-3);font-size:13px;margin-bottom:8px;flex-wrap:wrap}
+.crumbs a{color:var(--text-3)}.crumbs a:hover{color:var(--text)}
+.crumbs b{color:var(--text);font-weight:600}
+/* repo */
+.repo{display:grid;grid-template-columns:250px 1fr;gap:16px;align-items:start}
+.tree{padding:8px}
+.tree div{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:6px;cursor:pointer;font-weight:500;color:var(--text-2);font-size:13px}
+.tree div:hover{background:var(--muted)}
+.tree div.on{background:var(--sunken);color:var(--text-strong)}
+.tree svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;flex:none}
+.tree .lock{margin-left:auto;width:12px;height:12px;opacity:.5}
+.toolbar{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap}
+.bulk{background:var(--ink);color:var(--on-ink);border-radius:8px;padding:8px 14px;display:none;align-items:center;gap:12px;margin:12px 14px 0;font-size:13px}
+.bulk.show{display:flex}.bulk button{color:var(--on-ink);font-weight:600;font-size:12.5px;opacity:.85}.bulk button:hover{opacity:1}
+input[type=checkbox]{width:15px;height:15px;accent-color:var(--ink)}
+/* doc view */
+.docv{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+.paper{background:var(--sunken);border-radius:var(--r);padding:28px;display:flex;justify-content:center;min-height:620px}
+.page{background:#fff;width:100%;max-width:560px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.06);padding:44px 48px;font-size:12.5px;color:#222;line-height:1.7;position:relative}
+.page h3{font:700 17px var(--display);margin-bottom:4px}
+.page .meta{color:#777;font-size:11px;margin-bottom:22px}
+.page p{margin-bottom:12px}
+.page .line{height:8px;background:#eee;border-radius:3px;margin:9px 0}
+.page mark{background:#fde68a;padding:0 2px}
+.page .stamp{position:absolute;right:40px;top:40px;border:2px solid var(--pos);color:var(--pos);font:700 11px var(--mono);padding:4px 8px;border-radius:4px;transform:rotate(6deg);letter-spacing:.08em}
+.page .sig{margin-top:30px;display:flex;gap:40px}.page .sig div{border-top:1px solid #999;padding-top:4px;font-size:10px;color:#777;width:150px}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:10px 12px;font-size:13px}
+.kv dt{color:var(--text-3)}.kv dd{font-weight:500;word-break:break-word}
+.notice{display:flex;gap:10px;padding:11px 13px;border-radius:8px;font-size:12.5px;align-items:flex-start}
+.notice svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;margin-top:1px}
+.n-warn{background:var(--warn-bg);color:var(--warn)}.n-info{background:var(--signal-subtle);color:var(--info-text)}.n-danger{background:var(--danger-bg);color:var(--danger)}.n-pos{background:var(--pos-bg);color:var(--pos)}
+.timeline{position:relative;padding-left:22px}
+.timeline::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:1px;background:var(--border)}
+.tl{position:relative;padding-bottom:16px}
+.tl::before{content:"";position:absolute;left:-20px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--surface);border:2px solid var(--border-strong)}
+.tl.done::before{background:var(--pos);border-color:var(--pos)}.tl.cur::before{background:var(--warn);border-color:var(--warn)}.tl.rej::before{background:var(--danger);border-color:var(--danger)}
+.tl b{font-weight:600}.tl small{display:block;color:var(--text-3);font-size:12px}
+.tl .c{margin-top:6px;background:var(--muted);border:1px solid var(--border-subtle);border-radius:7px;padding:7px 10px;font-size:12.5px}
+/* compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cmp .page{max-width:none;padding:28px;font-size:12px;background:var(--surface);color:var(--text);box-shadow:none;border:1px solid var(--border)}
+del{background:var(--danger-bg);color:var(--danger);text-decoration:line-through}
+ins{background:var(--pos-bg);color:var(--pos);text-decoration:none}
+/* search */
+.srch{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start}
+.facet{padding:14px 16px;border-bottom:1px solid var(--border-subtle)}
+.facet:last-child{border:0}
+.facet h4{font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text-2)}
+.facet label{display:flex;align-items:center;gap:8px;font-size:13px;padding:3px 0;color:var(--text-2)}
+.facet label span{margin-left:auto;color:var(--text-3);font-size:12px}
+.hit{padding:16px 18px;border-bottom:1px solid var(--border-subtle);cursor:pointer}
+.hit:hover{background:var(--muted)}
+.hit .snip{color:var(--text-2);font-size:13px;margin:6px 0 8px 44px}
+.hit mark{background:#fde68a;color:#111;padding:0 1px;border-radius:2px}
+.hit .tags{margin-left:44px;display:flex;gap:6px;flex-wrap:wrap}
+.bigsearch{display:flex;gap:10px;margin-bottom:16px}
+.bigsearch input{flex:1;font-size:15px;padding:11px 14px}
+/* matrix */
+.matrix td,.matrix th{text-align:center}.matrix td:first-child,.matrix th:first-child{text-align:left}
+.tick{color:var(--pos);font-weight:700}.cross{color:#c4c4c4}
+/* modal */
+.scrim{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.scrim.show{display:flex}
+.modal{background:var(--surface);border-radius:14px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal.sm{max-width:480px}
+.modal-h{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-h h2{font:700 17px var(--display)}
+.modal-b{padding:20px 22px;overflow:auto}
+.modal-f{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;align-items:center}
+.x{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-size:18px;color:var(--text-3)}
+.x:hover{background:var(--sunken)}
+.drop{border:2px dashed var(--border-strong);border-radius:12px;padding:30px;text-align:center;background:var(--muted)}
+.drop.over{border-color:var(--signal);background:var(--signal-subtle)}
+.drop svg{width:30px;height:30px;stroke:var(--text-3);fill:none;stroke-width:1.5;margin-bottom:8px}
+.upl{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-subtle)}
+.bar{height:4px;background:var(--sunken);border-radius:2px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--ink);width:0;transition:width .4s}
+.steps{display:flex;gap:6px;font-size:11px;color:var(--text-3);margin-top:4px;flex-wrap:wrap}
+.steps span.ok{color:var(--pos);font-weight:600}
+.policy{background:var(--muted);border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:12.5px;margin-bottom:16px}
+.policy b{display:block;margin-bottom:4px}
+.toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--on-ink);padding:11px 18px;border-radius:10px;font-weight:500;opacity:0;transition:.25s;z-index:60;display:flex;gap:10px;align-items:center;font-size:13px;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast svg{width:16px;height:16px;stroke:var(--pos);fill:none;stroke-width:2.4}
+.hash{font:500 11px var(--mono);color:var(--text-3)}
+.chain{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--pos);font-weight:600}
+.chain svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2}
+.code{background:#0d0d0d;color:#e5e5e5;border-radius:9px;padding:14px 16px;font:12px/1.6 var(--mono);overflow:auto;white-space:pre}
+.code .k{color:#7dd3fc}.code .s{color:#86efac}.code .c{color:#737373}
+.empty{text-align:center;padding:40px;color:var(--text-3)}
+.hide-role{display:none!important}
+@media (max-width:1100px){.g4{grid-template-columns:1fr 1fr}.docv{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
+@media (max-width:860px){.app{grid-template-columns:1fr;grid-template-rows:auto 1fr}.side{flex-direction:row;align-items:center;border-right:0;border-bottom:1px solid var(--border);overflow-x:auto;min-width:0}.side .brand{padding:10px 12px;flex:none}.side .brand small{display:none}.nav{display:flex;flex:none;padding:6px;gap:2px}.nav h6{display:none}.nav a{white-space:nowrap}.me{border:0;flex:none;padding:8px 12px}.me .av,.me .who div{display:none}.top .btn.primary{padding:8px 10px}.kbd{display:none}.main{min-height:0}.tabs,.card{min-width:0}.card{overflow-x:auto}.head .row{width:100%}.view{min-width:0}.docv>div,.repo>div,.srch>div{min-width:0}.paper{padding:12px;min-height:0}.page{padding:24px 18px}.page .stamp{right:14px;top:14px}.repo,.srch,.g2,.g3{grid-template-columns:1fr}.view{padding:20px 16px 50px}.top{padding:0 16px}.proto{display:none}.cmp{grid-template-columns:1fr}}
+</style>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 16 16"><path d="M2 3h12v3H2zM2 7.5h12v2.5H2zM2 11.5h8V14H2z" fill="#fff"/></svg></div>
+      <div><b>Vaultline</b><small>ENTERPRISE DMS</small></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="me">
+      <div class="av" id="meAv">SR</div>
+      <div class="who">
+        <div id="meName">Sara Rahman</div>
+        <select id="role" aria-label="View as role">
+          <option value="admin">Admin</option>
+          <option value="records">Records Manager</option>
+          <option value="manager">Manager</option>
+          <option value="user">User</option>
+          <option value="viewer">Viewer</option>
+        </select>
+      </div>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <div class="search-top">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="qtop" placeholder="Search documents, contents and metadata…" aria-label="Search">
+        <span class="kbd">⌘K</span>
+      </div>
+      <div class="spacer"></div>
+      <span class="proto">Interactive prototype · sample data</span>
+      <button class="bell" onclick="go('approvals')" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></svg><i></i></button>
+      <button class="btn primary role-write" onclick="openUpload()"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0-5 5m5-5 5 5M4 20h16"/></svg>Upload</button>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg><span></span></div>
+
+<script>
+/* ---------------- sample data ---------------- */
+const I = {
+  dash:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
+  folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  check:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+  archive:'<path d="M3 4h18v4H3zM5 8v12h14V8M10 12h4"/>',
+  log:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  api:'<path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"/>'
+};
+const svg=(k,c='')=>`<svg viewBox="0 0 24 24" class="${c}">${I[k]}</svg>`;
+
+const FOLDERS=[
+ {id:'fin',name:'Finance',kids:[{id:'fin-ap',name:'Accounts Payable'},{id:'fin-ar',name:'Accounts Receivable'},{id:'fin-tax',name:'Tax & Audit'}]},
+ {id:'hr',name:'Human Resources',locked:true,kids:[{id:'hr-emp',name:'Employee Records'},{id:'hr-pol',name:'Policies'}]},
+ {id:'leg',name:'Legal',locked:true,kids:[{id:'leg-con',name:'Contracts'},{id:'leg-lit',name:'Litigation'}]},
+ {id:'ops',name:'Operations',kids:[{id:'ops-qa',name:'Quality (ISO 9001)'},{id:'ops-sop',name:'SOPs'}]},
+ {id:'proc',name:'Procurement',kids:[{id:'proc-po',name:'Purchase Orders'},{id:'proc-ven',name:'Vendor Files'}]}
+];
+const DOCS=[
+ {id:'D-10482',title:'Master Services Agreement — Northwind Logistics',ft:'pdf',folder:'leg-con',type:'Contract',dept:'Legal',ref:'CON-2026-0117',ver:'3.0',size:'2.4 MB',owner:'Omar Siddiqui',mod:'2026-10-07 16:42',status:'pending',ret:'2033-12-31',hold:false,scan:false},
+ {id:'D-10477',title:'Invoice INV-88213 — Atlas Steel Ltd',ft:'tif',folder:'fin-ap',type:'Invoice',dept:'Finance',ref:'INV-88213',ver:'1.0',size:'812 KB',owner:'Hina Akhtar',mod:'2026-10-07 11:05',status:'approved',ret:'2033-10-07',hold:false,scan:true},
+ {id:'D-10471',title:'Q3 2026 Management Accounts',ft:'xlsx',folder:'fin-tax',type:'Financial Report',dept:'Finance',ref:'FIN-Q3-2026',ver:'2.1',size:'1.1 MB',owner:'Sara Rahman',mod:'2026-10-06 18:20',status:'approved',ret:'2036-06-30',hold:false,scan:false},
+ {id:'D-10466',title:'Employee Handbook 2026',ft:'docx',folder:'hr-pol',type:'Policy',dept:'HR',ref:'POL-HR-001',ver:'5.2',size:'640 KB',owner:'Ayesha Khan',mod:'2026-10-05 09:31',status:'changes',ret:'Permanent',hold:false,scan:false},
+ {id:'D-10459',title:'Supplier Dispute — Correspondence Bundle',ft:'pdf',folder:'leg-lit',type:'Correspondence',dept:'Legal',ref:'LIT-2026-004',ver:'1.4',size:'18.7 MB',owner:'Omar Siddiqui',mod:'2026-10-04 14:12',status:'active',ret:'Hold',hold:true,scan:true},
+ {id:'D-10451',title:'SOP-QA-014 Incoming Material Inspection',ft:'docx',folder:'ops-qa',type:'SOP',dept:'Operations',ref:'SOP-QA-014',ver:'4.0',size:'388 KB',owner:'Bilal Ahmed',mod:'2026-10-03 12:00',status:'approved',ret:'2031-10-03',hold:false,scan:false},
+ {id:'D-10448',title:'Purchase Order PO-55102 — Kestrel Packaging',ft:'pdf',folder:'proc-po',type:'Purchase Order',dept:'Procurement',ref:'PO-55102',ver:'1.0',size:'204 KB',owner:'Zain Malik',mod:'2026-10-02 10:47',status:'rejected',ret:'2033-10-02',hold:false,scan:false},
+ {id:'D-10440',title:'Signed Offer Letter — scanned',ft:'tif',folder:'hr-emp',type:'HR Record',dept:'HR',ref:'EMP-00841',ver:'1.0',size:'1.9 MB',owner:'Ayesha Khan',mod:'2026-09-30 15:22',status:'active',ret:'Exit + 7y',hold:false,scan:true},
+ {id:'D-10432',title:'Vendor Onboarding Pack — Atlas Steel',ft:'pdf',folder:'proc-ven',type:'Vendor File',dept:'Procurement',ref:'VEN-0311',ver:'2.0',size:'3.6 MB',owner:'Zain Malik',mod:'2026-09-28 13:10',status:'approved',ret:'2032-09-28',hold:false,scan:false},
+ {id:'D-10425',title:'Board Approval Email — Capex FY27',ft:'msg',folder:'fin-tax',type:'Correspondence',dept:'Finance',ref:'BRD-2026-022',ver:'1.0',size:'96 KB',owner:'Sara Rahman',mod:'2026-09-26 08:55',status:'active',ret:'2036-09-26',hold:false,scan:false},
+ {id:'D-10419',title:'Customer Contract — Meridian Retail',ft:'pdf',folder:'leg-con',type:'Contract',dept:'Legal',ref:'CON-2026-0102',ver:'2.0',size:'1.3 MB',owner:'Omar Siddiqui',mod:'2026-09-24 17:01',status:'approved',ret:'2034-03-31',hold:true,scan:false},
+ {id:'D-10411',title:'Site Inspection Photos — Warehouse B',ft:'png',folder:'ops-qa',type:'Inspection Record',dept:'Operations',ref:'INS-2026-077',ver:'1.0',size:'9.2 MB',owner:'Bilal Ahmed',mod:'2026-09-22 11:40',status:'active',ret:'2029-09-22',hold:false,scan:false}
+];
+const ST={pending:['Pending review','b-warn'],approved:['Approved','b-pos'],rejected:['Rejected','b-danger'],changes:['Changes requested','b-info'],active:['Active','']};
+const USERS={admin:['Sara Rahman','SR'],records:['Faisal Qureshi','FQ'],manager:['Omar Siddiqui','OS'],user:['Hina Akhtar','HA'],viewer:['Guest Auditor','GA']};
+let role='admin';
+const can={
+  write:()=>['admin','records','manager','user'].includes(role),
+  approve:()=>['admin','manager'].includes(role),
+  records:()=>['admin','records'].includes(role),
+  audit:()=>['admin','records'].includes(role),
+  admin:()=>role==='admin',
+  hr:()=>['admin','records'].includes(role)
+};
+const folderName=id=>{for(const f of FOLDERS){if(f.id===id)return f.name;for(const k of f.kids)if(k.id===id)return k.name}return id};
+const folderPath=id=>{for(const f of FOLDERS){for(const k of f.kids)if(k.id===id)return[f,k]}return[]};
+const visibleDocs=()=>DOCS.filter(d=>can.hr()||!(d.folder.startsWith('hr')||d.folder==='leg-lit'));
+const badge=s=>`<span class="badge ${ST[s][1]}">${ST[s][0]}</span>`;
+const ft=t=>`<span class="ft ${t}">${t.toUpperCase().slice(0,4)}</span>`;
+
+/* ---------------- shell ---------------- */
+function renderNav(cur){
+  const pend=DOCS.filter(d=>d.status==='pending').length+2;
+  const items=[
+    ['h','Workspace'],['dashboard','Dashboard','dash'],['repository','Repository','folder'],['search','Search','search'],['approvals','Approvals','check',pend],
+    ['h','Governance'],['records','Records & holds','archive',null,can.records],['audit','Audit log','log',null,can.audit],
+    ['h','Settings'],['admin','Administration','gear',null,can.admin],['api','API & integrations','api',null,can.admin]
+  ];
+  document.getElementById('nav').innerHTML=items.map(i=>{
+    if(i[0]==='h')return`<h6>${i[1]}</h6>`;
+    if(i[4]&&!i[4]())return'';
+    return`<a href="#${i[0]}" class="${cur===i[0]?'active':''}">${svg(i[2])}${i[1]}${i[3]?`<span class="count">${i[3]}</span>`:''}</a>`;
+  }).join('');
+}
+function go(r){location.hash=r}
+function toast(m){const t=document.getElementById('toast');t.querySelector('span').textContent=m;t.classList.add('show');clearTimeout(t._);t._=setTimeout(()=>t.classList.remove('show'),2600)}
+function modal(html,size=''){const m=document.getElementById('modal');m.className='modal '+size;m.innerHTML=html;document.getElementById('scrim').classList.add('show')}
+function closeModal(){document.getElementById('scrim').classList.remove('show')}
+document.getElementById('scrim').addEventListener('click',e=>{if(e.target.id==='scrim')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('qtop').focus()}});
+document.getElementById('qtop').addEventListener('keydown',e=>{if(e.key==='Enter'){S.q=e.target.value||'indemnity';go('search')}});
+document.getElementById('role').addEventListener('change',e=>{role=e.target.value;const u=USERS[role];document.getElementById('meName').textContent=u[0];document.getElementById('meAv').textContent=u[1];
+  document.querySelectorAll('.role-write').forEach(b=>b.style.display=can.write()?'':'none');
+  const r=location.hash.slice(1).split('/')[0];
+  const guard={records:can.records,audit:can.audit,admin:can.admin,api:can.admin};
+  if(guard[r]&&!guard[r]())go('dashboard');else route();
+  toast('Viewing as '+e.target.selectedOptions[0].text+' — navigation and actions now follow that role');
+});
+
+/* ---------------- views ---------------- */
+const V={};
+V.dashboard=()=>{
+  const docs=visibleDocs();
+  return`<div class="head"><div><h1>Good morning, ${USERS[role][0].split(' ')[0]}</h1><p class="sub">Here's what needs your attention today.</p></div></div>
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="card card-b stat"><div class="k">Documents</div><div class="v">48,912</div><div class="d">+1,204 this month</div></div>
+    <div class="card card-b stat"><div class="k">Awaiting my approval</div><div class="v">3</div><div class="d">1 due today</div></div>
+    <div class="card card-b stat"><div class="k">On legal hold</div><div class="v">2,318</div><div class="d">3 active matters</div></div>
+    <div class="card card-b stat"><div class="k">OCR queue</div><div class="v">14</div><div class="d">avg 38s per scan</div></div>
+  </div>
+  <div class="grid g2" style="grid-template-columns:1.4fr 1fr">
+    <div class="card"><div class="card-h"><h2>Recently modified</h2><a href="#repository">Open repository →</a></div>
+      <table><tbody>${docs.slice(0,6).map(d=>`<tr class="click" onclick="go('doc/${d.id}')"><td><div class="name">${ft(d.ft)}<div><b>${d.title}</b><small>${folderName(d.folder)} · v${d.ver} · ${d.owner}</small></div></div></td><td style="text-align:right">${badge(d.status)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="grid" style="align-content:start">
+      <div class="card"><div class="card-h"><h2>My tasks</h2><a href="#approvals">All →</a></div>
+        <div class="card-b" style="display:grid;gap:12px">
+          ${[['D-10482','Approve: MSA — Northwind Logistics','Step 2 of 3 · Due today','b-warn'],['D-10466','Review changes: Employee Handbook 2026','Requested by Ayesha Khan','b-info'],['D-10477','Sign off: Invoice INV-88213','Step 1 of 2 · Due Fri','b-warn']].map(t=>`<div class="row" style="cursor:pointer" onclick="go('doc/${t[0]}')"><span class="badge ${t[3]} plain" style="width:8px;height:8px;padding:0;border-radius:50%"></span><div style="flex:1;min-width:0"><b style="font-weight:600">${t[1]}</b><div class="muted" style="font-size:12px">${t[2]}</div></div></div>`).join('')}
+        </div></div>
+      <div class="card"><div class="card-h"><h2>Compliance</h2></div>
+        <div class="card-b" style="display:grid;gap:10px">
+          <div class="notice n-pos"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg><div><b>Audit chain verified</b> — 1,882,410 events, last check 03:00 today</div></div>
+          <div class="notice n-warn"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0"/></svg><div><b>412 records</b> reached end of retention — awaiting disposition review</div></div>
+          <div class="notice n-info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div>Storage: 3.8 TB of 10 TB · 61% in archive tier</div></div>
+        </div></div>
+    </div>
+  </div>`;
+};
+
+let curFolder='leg-con';
+V.repository=()=>{
+  const [p,k]=folderPath(curFolder);
+  const docs=visibleDocs().filter(d=>d.folder===curFolder);
+  const lockedNote=(p&&p.locked)?`<span class="badge plain" title="Restricted folder">${svg('lock','').replace('<svg','<svg style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2"')} Restricted · Legal + Admin</span>`:'';
+  return`<div class="crumbs"><a href="#repository">Repository</a> / <a>${p?p.name:''}</a> / <b>${k?k.name:''}</b></div>
+  <div class="head"><div><h1>${k?k.name:''}</h1><p class="sub">Template: <b>Department / Function</b> · Upload policy: <b>${k&&k.id==='leg-con'?'Contracts — strict':'Standard'}</b> ${lockedNote}</p></div>
+    <div class="row">${can.write()?`<button class="btn" onclick="newFolder()">New folder</button><button class="btn primary" onclick="openUpload()">${svg('folder').replace('folder','')}Upload to folder</button>`:''}</div></div>
+  <div class="repo">
+    <div class="card tree">${FOLDERS.map(f=>{
+      const hidden=f.id==='hr'&&!can.hr();
+      if(hidden)return'';
+      return`<div>${svg('folder')}${f.name}${f.locked?svg('lock','lock'):''}</div>`+f.kids.filter(c=>can.hr()||c.id!=='leg-lit').map(c=>`<div style="padding-left:28px" class="${c.id===curFolder?'on':''}" onclick="curFolder='${c.id}';route()">${svg('folder')}${c.name}</div>`).join('')}).join('')}
+      <div style="margin-top:8px;border-top:1px solid var(--border-subtle);padding-top:12px;color:var(--text-3);font-size:12px;cursor:default">${can.hr()?'All folders visible for your role':'Some folders hidden by access control'}</div>
+    </div>
+    <div class="card">
+      <div class="toolbar"><span class="chip on">All types</span><span class="chip">Contract</span><span class="chip">Correspondence</span><span class="chip">Amendment</span><div class="spacer"></div><span class="muted" style="font-size:12px">${docs.length} documents</span></div>
+      <div class="bulk" id="bulk"><span id="bulkN">0 selected</span><div class="spacer"></div>${can.write()?'<button onclick="toast(\'Metadata updated on selected documents\')">Edit metadata</button><button onclick="toast(\'Moved — audit events written\')">Move</button>':''}${can.records()?'<button onclick="openHold()">Legal hold</button>':''}<button onclick="toast(\'ZIP export started — download will be audited\')">Download</button></div>
+      ${docs.length?`<table><thead><tr><th style="width:36px"><input type="checkbox" onclick="document.querySelectorAll('.sel').forEach(c=>c.checked=this.checked);bulk()"></th><th>Name</th><th>Reference</th><th>Version</th><th>Status</th><th>Retention</th><th>Modified</th></tr></thead><tbody>
+      ${docs.map(d=>`<tr class="click"><td onclick="event.stopPropagation()"><input type="checkbox" class="sel" onchange="bulk()"></td><td onclick="go('doc/${d.id}')"><div class="name">${ft(d.ft)}<div><b>${d.title}</b><small>${d.type} · ${d.size}${d.scan?' · OCR ✓':''}</small></div></div></td><td class="mono" onclick="go('doc/${d.id}')">${d.ref}</td><td onclick="go('doc/${d.id}')">v${d.ver}</td><td onclick="go('doc/${d.id}')">${badge(d.status)}</td><td onclick="go('doc/${d.id}')">${d.hold?'<span class="badge b-danger">Legal hold</span>':`<span class="muted">${d.ret}</span>`}</td><td class="muted" onclick="go('doc/${d.id}')">${d.mod.slice(0,10)}</td></tr>`).join('')}
+      </tbody></table>`:`<div class="empty">No documents in this folder yet.${can.write()?' Drop files here or use Upload.':''}</div>`}
+    </div>
+  </div>`;
+};
+function bulk(){const n=document.querySelectorAll('.sel:checked').length;const b=document.getElementById('bulk');b.classList.toggle('show',n>0);document.getElementById('bulkN').textContent=n+' selected'}
+function newFolder(){modal(`<div class="modal-h"><h2>New folder from template</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">
+  <div class="field"><label class="f">Folder template</label><select class="input"><option>Client / Matter (Legal)</option><option>Department / Year / Document Type</option><option>Vendor (Procurement)</option><option>Employee (HR) — restricted</option></select><div class="help">Templates lock the sub-folder structure, default permissions, upload policy and retention.</div></div>
+  <div class="field"><label class="f">Name <span class="req">*</span></label><input class="input" value="Northwind Logistics"></div>
+  <div class="policy"><b>This will create</b>Northwind Logistics / Agreements · Amendments · Correspondence · Invoices<br><span class="muted">Inherits: Legal Team (edit), Managers (read) · Policy: Contracts — strict · Retention: Contract end + 7 years</span></div></div>
+  <div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="closeModal();toast('Folder structure created from template')">Create</button></div>`,'sm')}
+
+/* ---------- document view ---------- */
+let docTab='preview';
+V.doc=(id)=>{
+  const d=DOCS.find(x=>x.id===id)||DOCS[0];
+  const [p,k]=folderPath(d.folder);
+  const tabs=[['preview','Preview'],['details','Details'],['versions','Versions'],['workflow','Workflow'],['activity','Activity']];
+  return`<div class="crumbs"><a href="#repository">Repository</a> / <a>${p.name}</a> / <a href="#repository" onclick="curFolder='${k.id}'">${k.name}</a> / <b>${d.ref}</b></div>
+  <div class="head"><div class="name">${ft(d.ft)}<div><h1 style="font-size:21px">${d.title}</h1><p class="sub">v${d.ver} · ${d.size} · ${d.owner} · ${d.id}</p></div></div>
+    <div class="row">${badge(d.status)}${d.hold?'<span class="badge b-danger">Legal hold</span>':''}
+      <button class="btn" onclick="toast('Download link issued (60s) — event logged')">Download</button>
+      ${can.write()?`<button class="btn" onclick="newVersion('${d.id}')">New version</button>`:''}
+      ${can.write()&&d.status!=='pending'?`<button class="btn primary" onclick="route_('${d.id}')">Route for approval</button>`:''}
+      ${can.approve()&&d.status==='pending'?`<button class="btn danger" onclick="decide('${d.id}','reject')">Reject</button><button class="btn primary" onclick="decide('${d.id}','approve')">Approve</button>`:''}
+    </div></div>
+  ${d.hold?`<div class="notice n-danger" style="margin-bottom:16px"><svg viewBox="0 0 24 24">${I.lock}</svg><div><b>On legal hold — Matter LIT-2026-004 (Atlas Steel dispute).</b> Deletion and disposition are blocked at the application and storage layer (Object Lock). Placed by Faisal Qureshi on 2026-09-12.</div></div>`:''}
+  <div class="tabs">${tabs.map(t=>`<button class="${docTab===t[0]?'on':''}" onclick="docTab='${t[0]}';route()">${t[1]}</button>`).join('')}</div>
+  <div class="docv"><div>${docBody(d)}</div>
+  <div class="grid" style="align-content:start">
+    <div class="card"><div class="card-h"><h2>Metadata</h2>${can.write()?`<button class="btn sm" onclick="docTab='details';route()">Edit</button>`:''}</div><div class="card-b"><dl class="kv">
+      <dt>Document type</dt><dd>${d.type}</dd><dt>Reference no.</dt><dd class="mono">${d.ref}</dd><dt>Department</dt><dd>${d.dept}</dd>
+      ${d.type==='Contract'?'<dt>Counterparty</dt><dd>Northwind Logistics LLC</dd><dt>Contract value</dt><dd>USD 1,240,000</dd><dt>Effective</dt><dd>2026-11-01</dd><dt>Expiry</dt><dd>2029-10-31</dd>':''}
+      ${d.type==='Invoice'?'<dt>Vendor</dt><dd>Atlas Steel Ltd</dd><dt>Amount</dt><dd>PKR 4,812,500</dd><dt>Invoice date</dt><dd>2026-10-01</dd><dt>ERP ref</dt><dd class="mono">SAP-5100049921</dd>':''}
+      <dt>Classification</dt><dd>${['Legal','HR'].includes(d.dept)?'Confidential':'Internal'}</dd>
+    </dl></div></div>
+    <div class="card"><div class="card-h"><h2>Records</h2></div><div class="card-b"><dl class="kv">
+      <dt>Retention rule</dt><dd>${d.type==='Contract'?'Contracts: expiry + 7y':d.type==='Invoice'?'Finance: 7 years':'Default: 5 years'}</dd>
+      <dt>Retain until</dt><dd>${d.hold?'<span class="badge b-danger">Suspended by hold</span>':d.ret}</dd>
+      <dt>Storage tier</dt><dd>Hot (S3 Standard)</dd><dt>Encryption</dt><dd>AES-256 · KMS key edms-prod-01</dd>
+      <dt>SHA-256</dt><dd class="hash">9f2c…e41b7a</dd></dl></div></div>
+    <div class="card"><div class="card-h"><h2>Access</h2><button class="btn sm" onclick="docTab='details';route()">Who has access</button></div><div class="card-b" style="display:grid;gap:8px;font-size:13px">
+      <div class="row"><div class="av">LT</div><div style="flex:1">Legal Team</div><span class="muted">Edit</span></div>
+      <div class="row"><div class="av">MG</div><div style="flex:1">Managers</div><span class="muted">Read</span></div>
+      <div class="row"><div class="av">FN</div><div style="flex:1">Finance Controllers</div><span class="muted">Read · Approve</span></div>
+      <div class="help">Inherited from /${p.name}/${k.name} · 1 document-level override</div></div></div>
+  </div></div>`;
+};
+function docBody(d){
+  if(docTab==='preview')return`<div class="paper"><div class="page">${d.status==='approved'?'<div class="stamp">APPROVED</div>':''}
+    <h3>${d.title}</h3><div class="meta">${d.ref} · Version ${d.ver} ${d.scan?'· Scanned document — text layer generated by OCR':''}</div>
+    <p>This ${d.type.toLowerCase()} is entered into on 1 November 2026 between <b>Meridian Holdings (Pvt) Ltd</b> ("the Company") and <b>Northwind Logistics LLC</b> ("the Provider").</p>
+    <p><b>1. Services.</b> The Provider shall deliver freight forwarding, warehousing and last-mile distribution services as described in Schedule A, in accordance with the service levels in Schedule B.</p>
+    <p><b>2. Term.</b> The agreement commences on the Effective Date and continues for thirty-six (36) months unless terminated earlier under clause 11.</p>
+    <p><b>3. Fees.</b> Fees are payable within <mark>forty-five (45) days</mark> of a valid invoice. Late payments accrue interest at 1.5% per month.</p>
+    <p><b>4. Indemnity.</b> Each party shall <mark>indemnify</mark> the other against losses arising from its breach, negligence or wilful misconduct, capped at the fees paid in the preceding twelve months.</p>
+    <div class="line" style="width:94%"></div><div class="line" style="width:88%"></div><div class="line" style="width:91%"></div><div class="line" style="width:60%"></div>
+    <div class="sig"><div>For the Company</div><div>For the Provider</div></div>
+    <div class="muted" style="position:absolute;bottom:16px;right:24px;font-size:10px">Page 1 of 14</div></div></div>`;
+  if(d.id&&docTab==='details')return`<div class="card"><div class="card-h"><h2>Edit metadata</h2><span class="muted" style="font-size:12px">Schema: ${d.type} (v4)</span></div><div class="card-b">
+    <div class="grid g2"><div class="field"><label class="f">Document type <span class="req">*</span></label><select class="input" ${can.write()?'':'disabled'}><option>${d.type}</option></select></div>
+    <div class="field"><label class="f">Reference number <span class="req">*</span></label><input class="input mono" value="${d.ref}" ${can.write()?'':'disabled'}></div>
+    <div class="field"><label class="f">Department <span class="req">*</span></label><select class="input" ${can.write()?'':'disabled'}><option>${d.dept}</option></select></div>
+    <div class="field"><label class="f">Document date <span class="req">*</span></label><input type="date" class="input" value="2026-10-01" ${can.write()?'':'disabled'}></div>
+    <div class="field"><label class="f">Counterparty</label><input class="input" value="Northwind Logistics LLC" ${can.write()?'':'disabled'}></div>
+    <div class="field"><label class="f">Classification</label><select class="input" ${can.write()?'':'disabled'}><option>Confidential</option><option>Internal</option><option>Public</option></select></div></div>
+    <div class="field"><label class="f">Keywords</label><input class="input" value="logistics, MSA, freight, 2026" ${can.write()?'':'disabled'}></div>
+    ${can.write()?'<div class="row"><div class="spacer"></div><button class="btn primary" onclick="toast(\'Metadata saved — previous values kept in history\')">Save changes</button></div>':'<div class="notice n-info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>Read-only for your role.</div>'}
+  </div></div>
+  <div class="card" style="margin-top:16px"><div class="card-h"><h2>Effective permissions</h2></div><table class="matrix"><thead><tr><th>Principal</th><th>Read</th><th>Download</th><th>Edit</th><th>Approve</th><th>Delete</th><th>Source</th></tr></thead><tbody>
+    ${[['Legal Team','✓✓✓·✓','Folder /Legal'],['Managers','✓✓···','Folder /Legal'],['Finance Controllers','✓✓·✓·','Document override'],['Contractors','×××××','Explicit deny']].map(r=>`<tr><td>${r[0]}</td>${[...r[1]].map(c=>c==='✓'?'<td class="tick">✓</td>':c==='×'?'<td style="color:var(--danger);font-weight:700">✕</td>':'<td class="cross">—</td>').join('')}<td class="muted" style="text-align:left">${r[2]}</td></tr>`).join('')}
+  </tbody></table></div>`;
+  if(docTab==='versions')return`<div class="card"><div class="card-h"><h2>Version history</h2><button class="btn sm" onclick="compare()">Compare v2.0 ↔ v3.0</button></div><table><thead><tr><th>Version</th><th>Change note</th><th>Author</th><th>Date</th><th>Approval</th><th></th></tr></thead><tbody>
+    ${[['3.0','Revised payment terms to 45 days; indemnity cap added','Omar Siddiqui','2026-10-07 16:42','<span class="badge b-warn">In review</span>'],['2.1','Typo fixes in Schedule B','Omar Siddiqui','2026-10-02 10:15','<span class="muted">—</span>'],['2.0','Counterparty redlines incorporated','Legal Team','2026-09-29 14:03','<span class="badge b-pos">Approved</span>'],['1.0','Initial draft from template','Omar Siddiqui','2026-09-18 09:20','<span class="muted">—</span>']].map((v,i)=>`<tr><td><b>v${v[0]}</b>${i===0?' <span class="badge plain">current</span>':''}</td><td>${v[1]}</td><td>${v[2]}</td><td class="muted">${v[3]}</td><td>${v[4]}</td><td style="text-align:right;white-space:nowrap"><button class="btn sm" onclick="toast('Opened v${v[0]} read-only')">View</button> ${i>0&&can.write()?`<button class="btn sm" onclick="toast('Restored as v3.1 — history preserved')">Restore</button>`:''}</td></tr>`).join('')}
+  </tbody></table></div><p class="help" style="margin-top:10px">Versions are immutable. Restoring creates a new version; nothing is overwritten. Each version keeps its own hash and approval record.</p>`;
+  if(docTab==='workflow')return`<div class="card"><div class="card-h"><h2>Contract approval (3 steps)</h2>${badge(d.status==='pending'?'pending':d.status)}</div><div class="card-b"><div class="timeline">
+    <div class="tl done"><b>Submitted for approval</b><small>Omar Siddiqui · 2026-10-07 16:45 · on v3.0</small></div>
+    <div class="tl done"><b>Step 1 — Legal review</b> <span class="badge b-pos">Approved</span><small>Ayesha Khan (Legal Team) · 2026-10-07 18:02</small><div class="c">Indemnity cap language OK. Payment term change agreed with Finance.</div></div>
+    <div class="tl ${d.status==='approved'?'done':'cur'}"><b>Step 2 — Finance Controller</b> ${d.status==='approved'?'<span class="badge b-pos">Approved</span>':'<span class="badge b-warn">Waiting · due today 18:00</span>'}<small>Sara Rahman · SLA 2 days · reminder sent 09:00</small></div>
+    <div class="tl"><b>Step 3 — Managing Director</b><small>Any of: Managing Director, Deputy MD</small></div>
+  </div></div></div>`;
+  if(docTab==='activity')return auditTable(AUDIT.filter(a=>a.doc==='D-10482'||true).slice(0,8),true);
+}
+function compare(){modal(`<div class="modal-h"><h2>Compare v2.0 → v3.0</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">
+  <div class="row" style="margin-bottom:12px"><span class="chip on">Text diff</span><span class="chip">Side by side</span><span class="chip">Metadata</span><div class="spacer"></div><span class="muted" style="font-size:12px">3 changes · 2 additions · 1 deletion</span></div>
+  <div class="cmp"><div class="page"><b>v2.0</b> · 2026-09-29<br><br><p><b>3. Fees.</b> Fees are payable within <del>thirty (30) days</del> of a valid invoice.</p><p><b>4. Indemnity.</b> Each party shall indemnify the other against losses arising from its breach, negligence or wilful misconduct.</p></div>
+  <div class="page"><b>v3.0</b> · 2026-10-07<br><br><p><b>3. Fees.</b> Fees are payable within <ins>forty-five (45) days</ins> of a valid invoice. <ins>Late payments accrue interest at 1.5% per month.</ins></p><p><b>4. Indemnity.</b> Each party shall indemnify the other against losses arising from its breach, negligence or wilful misconduct<ins>, capped at the fees paid in the preceding twelve months</ins>.</p></div></div>
+  <div style="margin-top:14px"><table><thead><tr><th>Metadata field</th><th>v2.0</th><th>v3.0</th></tr></thead><tbody><tr><td>Payment terms</td><td><del>Net 30</del></td><td><ins>Net 45</ins></td></tr><tr><td>Contract value</td><td>USD 1,240,000</td><td>USD 1,240,000</td></tr></tbody></table></div>
+  </div><div class="modal-f"><button class="btn" onclick="closeModal()">Close</button></div>`)}
+function newVersion(id){modal(`<div class="modal-h"><h2>Upload new version</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">
+  <div class="drop">${'<svg viewBox="0 0 24 24"><path d="M12 16V4m0 0-5 5m5-5 5 5M4 20h16"/></svg>'}<div><b>Drop the updated file</b></div><div class="muted" style="font-size:12px">Current: v3.0</div></div>
+  <div class="grid g2" style="margin-top:16px"><div class="field"><label class="f">Version type</label><select class="input"><option>Minor (v3.1)</option><option>Major (v4.0)</option></select></div><div class="field"><label class="f">Change note <span class="req">*</span></label><input class="input" placeholder="What changed?"></div></div>
+  <div class="notice n-warn"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01"/></svg>This document is in an approval workflow. A new version will pause the workflow and notify the initiator.</div>
+  </div><div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="closeModal();toast('v3.1 created — previous versions kept')">Upload version</button></div>`,'sm')}
+function route_(id){modal(`<div class="modal-h"><h2>Route for approval</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">
+  <div class="field"><label class="f">Workflow</label><select class="input"><option>Contract approval (Legal → Finance → MD)</option><option>Invoice sign-off (AP → Controller)</option><option>Policy publication (HR → Compliance)</option><option>Ad-hoc — choose reviewers</option></select></div>
+  <div class="timeline" style="margin:8px 0 14px"><div class="tl"><b>1 · Legal Team</b><small>any one member · SLA 2 days</small></div><div class="tl"><b>2 · Finance Controller</b><small>Sara Rahman · SLA 2 days</small></div><div class="tl"><b>3 · Managing Director</b><small>SLA 3 days</small></div></div>
+  <div class="field"><label class="f">Message to reviewers</label><textarea class="input" rows="3">Please review revised payment terms (clause 3) and indemnity cap (clause 4).</textarea></div>
+  <label class="row" style="font-size:13px"><input type="checkbox" checked> Email + in-app notifications · reminders at 50% SLA · escalate when overdue</label>
+  </div><div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="closeModal();const d=DOCS.find(x=>x.id==='${id}');d.status='pending';docTab='workflow';route();toast('Routed — Legal Team notified')">Start workflow</button></div>`,'sm')}
+function decide(id,act){
+  modal(`<div class="modal-h"><h2>${act==='approve'?'Approve':'Reject'} v3.0</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">
+  <p style="margin-bottom:12px">You're signing off <b>step 2 — Finance Controller</b>. Your decision is bound to version 3.0 (SHA-256 9f2c…e41b7a) and recorded in the audit trail.</p>
+  <div class="field"><label class="f">Comment ${act==='reject'?'<span class="req">* required</span>':'(optional)'}</label><textarea class="input" rows="3" id="cmt" placeholder="${act==='reject'?'Explain what must change':'Add a note'}"></textarea></div>
+  <div class="field"><label class="f">Confirm with MFA code</label><input class="input mono" value="••••••" style="max-width:140px"></div>
+  </div><div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn ${act==='approve'?'primary':'danger'}" onclick="if('${act}'==='reject'&&!document.getElementById('cmt').value){document.getElementById('cmt').classList.add('err');return}closeModal();const d=DOCS.find(x=>x.id==='${id}');d.status='${act==='approve'?'approved':'rejected'}';route();toast('${act==='approve'?'Approved — next step: Managing Director notified':'Rejected — initiator notified'}')">${act==='approve'?'Approve':'Reject'}</button></div>`,'sm')}
+
+/* ---------- upload ---------- */
+function openUpload(){
+  modal(`<div class="modal-h"><h2>Upload documents</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">
+  <div class="field"><label class="f">Destination</label><select class="input" id="dest"><option value="leg-con">Legal / Contracts</option><option value="fin-ap">Finance / Accounts Payable</option></select></div>
+  <div class="policy"><b>Upload policy: Contracts — strict</b>Allowed: PDF, DOCX · Max 200 MB · Required: Document type, Reference no. (CON-YYYY-####), Counterparty, Effective date · Auto: virus scan, OCR, retention "expiry + 7y"</div>
+  <div class="drop" id="drop" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');addFiles()">
+    <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0-5 5m5-5 5 5M4 20h16"/></svg>
+    <div><b>Drag files or folders here</b></div><div class="muted" style="font-size:12px;margin:2px 0 12px">Single or bulk · resumable · up to 5 GB per file</div>
+    <button class="btn" onclick="addFiles()">Browse files</button>
+  </div>
+  <div id="ulist" style="margin-top:12px"></div>
+  </div><div class="modal-f"><span class="muted" id="ustate" style="font-size:12px;margin-right:auto"></span><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="commit" disabled onclick="commitUpload()">Save to repository</button></div>`);
+}
+function addFiles(){
+  const files=[['MSA_Northwind_signed.pdf','pdf','2.4 MB',true],['Amendment_01_Northwind.docx','docx','188 KB',true],['scan_0041.tif','tif','6.1 MB',false]];
+  document.getElementById('drop').style.display='none';
+  document.getElementById('ulist').innerHTML=files.map((f,i)=>`<div class="card" style="margin-bottom:10px"><div class="card-b">
+    <div class="upl" style="border:0;padding:0 0 10px"><span class="ft ${f[1]}">${f[1].toUpperCase()}</span><div style="flex:1"><b>${f[0]}</b> <span class="muted">· ${f[2]}</span><div class="bar"><i id="bar${i}"></i></div><div class="steps" id="st${i}"><span>Uploading</span></div></div></div>
+    ${f[3]?`<div class="grid g2" style="gap:10px">
+      <div><label class="f">Document type <span class="req">*</span></label><select class="input"><option>${i?'Amendment':'Contract'}</option></select></div>
+      <div><label class="f">Reference no. <span class="req">*</span></label><input class="input mono req-f" data-i="${i}" value="${i?'CON-2026-0117':''}" placeholder="CON-YYYY-####" oninput="checkPolicy()"></div>
+      <div><label class="f">Counterparty <span class="req">*</span></label><input class="input" value="Northwind Logistics LLC"></div>
+      <div><label class="f">Effective date <span class="req">*</span></label><input type="date" class="input" value="2026-11-01"></div></div>`:
+      `<div class="notice n-danger"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01"/></svg><div><b>Blocked by policy:</b> TIFF is not allowed in Contracts. Convert to searchable PDF/A automatically, or choose another folder. <a onclick="this.closest('.notice').outerHTML='<div class=&quot;notice n-pos&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;m5 12 5 5L20 7&quot;/></svg>Will be converted to PDF/A with OCR text layer on save.</div>';checkPolicy()" style="cursor:pointer;font-weight:600">Convert to PDF/A</a></div></div>`}
+  </div></div>`).join('');
+  files.forEach((f,i)=>{let p=0;const t=setInterval(()=>{p+=25;document.getElementById('bar'+i).style.width=p+'%';if(p>=100){clearInterval(t);document.getElementById('st'+i).innerHTML='<span class="ok">✓ Uploaded</span><span class="ok">✓ Hash</span><span class="ok">✓ Virus scan</span><span>Queued: extract · OCR · index</span>';checkPolicy()}},180+i*90)});
+}
+function checkPolicy(){
+  const refs=[...document.querySelectorAll('.req-f')];let bad=0;
+  refs.forEach(r=>{const ok=/^CON-\d{4}-\d{4}$/.test(r.value);r.classList.toggle('err',!ok);if(!ok)bad++});
+  const tifBlocked=!!document.querySelector('#ulist .n-danger');
+  const n=bad+(tifBlocked?1:0);
+  document.getElementById('ustate').textContent=n?`${n} item(s) need attention before saving`:'All files pass the upload policy';
+  document.getElementById('ustate').style.color=n?'var(--danger)':'var(--pos)';
+  document.getElementById('commit').disabled=!!n;
+}
+function commitUpload(){closeModal();DOCS.unshift({id:'D-10490',title:'MSA — Northwind Logistics (signed)',ft:'pdf',folder:'leg-con',type:'Contract',dept:'Legal',ref:'CON-2026-0118',ver:'1.0',size:'2.4 MB',owner:USERS[role][0],mod:'2026-10-08 11:52',status:'active',ret:'2036-10-31',hold:false,scan:false});curFolder='leg-con';go('repository');route();toast('3 documents saved · processing OCR and indexing')}
+
+/* ---------- search ---------- */
+const S={q:'indemnity'};
+V.search=()=>{
+  const docs=visibleDocs();
+  const hits=[
+    [docs.find(d=>d.id==='D-10482'),'…Each party shall <mark>indemnify</mark> the other against losses arising from its breach, negligence or wilful misconduct, capped at the fees…','Content · page 1'],
+    [docs.find(d=>d.id==='D-10419'),'…the Supplier agrees to <mark>indemnify</mark> and hold harmless Meridian Retail from third-party claims relating to product defects…','Content · page 6'],
+    [docs.find(d=>d.id==='D-10459'),'…[OCR] we refer to the <mark>indemnity</mark> provisions in clause 9 of the supply agreement dated 14 March…','Scanned · OCR text · page 3'],
+    [docs.find(d=>d.id==='D-10432'),'…insurance certificates and <mark>indemnity</mark> undertaking signed by authorised signatory…','Content · page 2']
+  ].filter(h=>h[0]);
+  return`<div class="head"><div><h1>Search</h1><p class="sub">Full-text across electronic files and OCR'd scans · results trimmed to your permissions</p></div></div>
+  <div class="bigsearch"><input class="input" id="qbig" value="${S.q}" onkeydown="if(event.key==='Enter'){S.q=this.value;route()}"><button class="btn primary" onclick="S.q=document.getElementById('qbig').value;route()">Search</button><button class="btn" onclick="toast('Saved search “${S.q}” — shareable with your team')">Save search</button></div>
+  <div class="srch"><div class="card">
+    <div class="facet"><h4>Document type</h4>${[['Contract',2],['Correspondence',1],['Vendor File',1],['Invoice',0]].map(f=>`<label><input type="checkbox" ${f[1]?'checked':''}>${f[0]}<span>${f[1]}</span></label>`).join('')}</div>
+    <div class="facet"><h4>Department</h4>${[['Legal',3],['Procurement',1],['Finance',0]].map(f=>`<label><input type="checkbox" checked>${f[0]}<span>${f[1]}</span></label>`).join('')}</div>
+    <div class="facet"><h4>Date range</h4><div class="grid" style="gap:6px"><input type="date" class="input" value="2026-01-01"><input type="date" class="input" value="2026-10-08"></div></div>
+    <div class="facet"><h4>Source</h4><label><input type="checkbox" checked>Electronic<span>3</span></label><label><input type="checkbox" checked>Scanned (OCR)<span>1</span></label></div>
+    <div class="facet"><h4>Folder</h4><select class="input"><option>All folders</option><option>Legal (incl. sub-folders)</option></select></div>
+    <div class="facet"><h4>Status</h4><label><input type="checkbox">On legal hold<span>2</span></label><label><input type="checkbox">Pending review<span>1</span></label></div>
+  </div>
+  <div class="card"><div class="card-h"><span class="muted" style="font-size:13px"><b style="color:var(--text)">${hits.length} results</b> for “${S.q}” · 84 ms</span><select class="input" style="width:auto"><option>Most relevant</option><option>Newest</option></select></div>
+    ${hits.map(h=>`<div class="hit" onclick="docTab='preview';go('doc/${h[0].id}')"><div class="name">${ft(h[0].ft)}<div><b>${h[0].title}</b><small>${folderName(h[0].folder)} · v${h[0].ver} · ${h[0].mod.slice(0,10)} · ${h[2]}</small></div></div><div class="snip">${h[1]}</div><div class="tags"><span class="badge plain">${h[0].type}</span><span class="badge plain mono">${h[0].ref}</span>${h[0].hold?'<span class="badge b-danger">Legal hold</span>':''}</div></div>`).join('')}
+    ${!can.hr()?'<div class="card-b muted" style="font-size:12px;border-top:1px solid var(--border-subtle)">Results from folders you can\'t access are excluded entirely — not just hidden.</div>':''}
+  </div></div>`;
+};
+
+/* ---------- approvals ---------- */
+let apTab='mine';
+V.approvals=()=>{
+  const rows=[['D-10482','pending','Contract approval','2 / 3','Today 18:00','Omar Siddiqui'],['D-10477','pending','Invoice sign-off','1 / 2','Fri 10 Oct','Hina Akhtar'],['D-10466','changes','Policy publication','1 / 2','—','Ayesha Khan'],['D-10471','approved','Financial report sign-off','2 / 2','Done','Sara Rahman'],['D-10448','rejected','PO approval','1 / 2','Done','Zain Malik'],['D-10451','approved','SOP publication','2 / 2','Done','Bilal Ahmed']];
+  const list=rows.filter(r=>apTab==='mine'?['pending','changes'].includes(r[1]):true);
+  return`<div class="head"><div><h1>Approvals</h1><p class="sub">Linear, content-centric workflows. Every decision is tied to a document version.</p></div>${can.admin()?'<button class="btn" onclick="go(\'admin\');setTimeout(()=>{adTab=\'workflows\';route()},0)">Manage workflow templates</button>':''}</div>
+  <div class="grid g4" style="margin-bottom:16px">${[['Pending',2,'b-warn'],['Changes requested',1,'b-info'],['Approved (30d)',47,'b-pos'],['Rejected (30d)',5,'b-danger']].map(s=>`<div class="card card-b stat"><div class="k"><span class="badge ${s[2]}">${s[0]}</span></div><div class="v">${s[1]}</div></div>`).join('')}</div>
+  <div class="tabs">${[['mine','Needs my action'],['sent','Sent by me'],['all','All workflows']].map(t=>`<button class="${apTab===t[0]?'on':''}" onclick="apTab='${t[0]}';route()">${t[1]}</button>`).join('')}</div>
+  <div class="card"><table><thead><tr><th>Document</th><th>Workflow</th><th>Step</th><th>Status</th><th>Due</th><th>Initiator</th></tr></thead><tbody>
+  ${list.map(r=>{const d=DOCS.find(x=>x.id===r[0]);return`<tr class="click" onclick="docTab='workflow';go('doc/${d.id}')"><td><div class="name">${ft(d.ft)}<div><b>${d.title}</b><small class="mono">${d.ref} · v${d.ver}</small></div></div></td><td>${r[2]}</td><td>${r[3]}</td><td>${badge(d.status)}</td><td class="${r[4].startsWith('Today')?'':'muted'}" style="${r[4].startsWith('Today')?'color:var(--warn);font-weight:600':''}">${r[4]}</td><td class="muted">${r[5]}</td></tr>`}).join('')}
+  </tbody></table></div>`;
+};
+
+/* ---------- records ---------- */
+let recTab='retention';
+V.records=()=>{
+  if(!can.records())return'<div class="empty">Records management requires the Records Manager role.</div>';
+  const tabs=[['retention','Retention schedules'],['holds','Legal holds'],['disposition','Disposition queue'],['migration','Migration']];
+  let b='';
+  if(recTab==='retention')b=`<div class="card"><div class="card-h"><h2>Retention rules</h2><button class="btn sm primary" onclick="toast('Rule editor — preview shows impacted documents before applying')">New rule</button></div><table><thead><tr><th>Rule</th><th>Applies to</th><th>Trigger</th><th>Period</th><th>At expiry</th><th>Documents</th></tr></thead><tbody>
+    ${[['Contracts','Type = Contract','Expiry date field','7 years','Review','1,284'],['Finance — transactional','Type ∈ Invoice, PO, Receipt','Document date','7 years','Dispose','21,906'],['Financial statements','Type = Financial Report','Fiscal year end','10 years','Archive','312'],['HR — employee file','Folder /HR/Employee Records','Employee exit date','7 years','Review','6,041'],['Policies & SOPs','Type ∈ Policy, SOP','Superseded date','5 years','Archive','488'],['Default','Everything else','Created date','5 years','Review','18,881']].map(r=>`<tr><td><b>${r[0]}</b></td><td class="muted">${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><span class="badge plain">${r[4]}</span></td><td>${r[5]}</td></tr>`).join('')}
+    </tbody></table></div><p class="help" style="margin-top:10px">When rules overlap, the longest retention wins. Rule changes are versioned and audited, and show an impact preview before they apply.</p>`;
+  if(recTab==='holds')b=`<div class="row" style="margin-bottom:12px"><div class="spacer"></div><button class="btn primary" onclick="openHold()">Place legal hold</button></div><div class="card"><table><thead><tr><th>Matter</th><th>Scope</th><th>Documents</th><th>Custodian</th><th>Placed</th><th>Status</th><th></th></tr></thead><tbody>
+    ${[['LIT-2026-004 · Atlas Steel supply dispute','Folder /Legal/Litigation + saved search “Atlas Steel”','1,906','Omar Siddiqui','2026-09-12','Active'],['REG-2026-011 · Tax authority inquiry FY24','Folder /Finance/Tax & Audit (FY24)','398','Sara Rahman','2026-08-03','Active'],['EMP-2026-002 · Employment claim','14 selected documents','14','Ayesha Khan','2026-07-21','Active'],['LIT-2025-019 · Warehouse lease','Folder /Legal/Contracts/Harbor Estates','62','Omar Siddiqui','2025-11-02','Released 2026-06-30']].map(r=>`<tr><td><b>${r[0]}</b></td><td class="muted">${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="muted">${r[4]}</td><td>${r[5]==='Active'?'<span class="badge b-danger">Active</span>':`<span class="badge plain">${r[5]}</span>`}</td><td>${r[5]==='Active'?'<button class="btn sm" onclick="toast(\'Release requires a reason and is audited\')">Release</button>':''}</td></tr>`).join('')}
+    </tbody></table></div>`;
+  if(recTab==='disposition')b=`<div class="notice n-warn" style="margin-bottom:14px"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01"/></svg><div><b>412 documents</b> reached end of retention under “Finance — transactional (7y)”. Items on hold are excluded automatically and re-checked at execution.</div></div>
+    <div class="card"><div class="card-h"><h2>Batch DISP-2026-10-A</h2><div class="row"><button class="btn sm" onclick="toast('Exported batch manifest (CSV)')">Export manifest</button>${''}<button class="btn sm danger" onclick="dispose()">Approve destruction</button></div></div><table><thead><tr><th><input type="checkbox" checked></th><th>Document</th><th>Rule</th><th>Retention ended</th><th>Hold check</th></tr></thead><tbody>
+    ${[['INV-61002 — Kestrel Packaging','2026-09-30'],['INV-61019 — Atlas Steel Ltd','2026-09-30'],['PO-40211 — Orion Chemicals','2026-10-01'],['INV-61044 — Delta Freight','2026-10-02'],['RCPT-22018 — Petty cash Q3 2019','2026-10-03']].map(r=>`<tr><td><input type="checkbox" checked></td><td>${r[0]}</td><td class="muted">Finance — transactional</td><td>${r[1]}</td><td><span class="badge b-pos">No hold</span></td></tr>`).join('')}
+    <tr><td colspan="5" class="muted" style="text-align:center">+ 407 more</td></tr></tbody></table></div>`;
+  if(recTab==='migration')b=`<div class="card"><div class="card-h"><h2>Legacy migration — \\\\fs01\\shared (file server)</h2><span class="badge b-info">Dry run complete</span></div><div class="card-b">
+    <div class="grid g4" style="margin-bottom:16px">${[['Files found','184,220'],['Mapped','176,902'],['Need attention','6,811'],['Duplicates (hash)','507']].map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v" style="font-size:22px">${s[1]}</div></div>`).join('')}</div>
+    <table><thead><tr><th>Source path</th><th>Target</th><th>Doc type</th><th>Files</th><th>Result</th></tr></thead><tbody>
+    ${[['\\Accounts\\Invoices\\*','/Finance/Accounts Payable','Invoice','92,114','<span class="badge b-pos">Ready</span>'],['\\Legal\\Contracts\\*','/Legal/Contracts','Contract','4,980','<span class="badge b-warn">212 missing ref no.</span>'],['\\HR\\Personnel\\*','/HR/Employee Records','HR Record','18,406','<span class="badge b-pos">Ready</span>'],['\\Scans\\2014-2019\\*','/Operations/Archive','(from OCR)','62,301','<span class="badge b-warn">6,599 low OCR confidence</span>']].map(r=>`<tr><td class="mono">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join('')}
+    </tbody></table><div class="row" style="margin-top:14px"><button class="btn">Download validation report</button><div class="spacer"></div><button class="btn primary" onclick="toast('Migration scheduled — resumable, checksummed, fully audited')">Start migration</button></div></div></div>`;
+  return`<div class="head"><div><h1>Records & legal holds</h1><p class="sub">Retention, holds and defensible deletion — enforced by policy, provable in audit.</p></div></div>
+  <div class="tabs">${tabs.map(t=>`<button class="${recTab===t[0]?'on':''}" onclick="recTab='${t[0]}';route()">${t[1]}</button>`).join('')}</div>${b}`;
+};
+function openHold(){modal(`<div class="modal-h"><h2>Place legal hold</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">
+  <div class="grid g2"><div class="field"><label class="f">Matter reference <span class="req">*</span></label><input class="input mono" value="LIT-2026-005"></div><div class="field"><label class="f">Custodian <span class="req">*</span></label><select class="input"><option>Omar Siddiqui</option></select></div></div>
+  <div class="field"><label class="f">Scope</label><select class="input"><option>Saved search: “Northwind” in /Legal (incl. future matches)</option><option>Folder and all future additions</option><option>Selected documents only</option></select></div>
+  <div class="field"><label class="f">Reason <span class="req">*</span></label><textarea class="input" rows="2">Anticipated contractual dispute — preserve all Northwind correspondence and agreements.</textarea></div>
+  <div class="notice n-info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div><b>87 documents</b> will be held. Deletion, disposition and version purge are blocked; Object Lock legal-hold flag is set in storage. Custodian will be notified.</div></div>
+  </div><div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="closeModal();toast('Legal hold LIT-2026-005 placed on 87 documents')">Place hold</button></div>`,'sm')}
+function dispose(){modal(`<div class="modal-h"><h2>Approve destruction</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">
+  <p>412 documents and all their versions, renditions and index entries will be permanently destroyed.</p><br>
+  <div class="kv" style="font-size:13px"><dt>Batch</dt><dd class="mono">DISP-2026-10-A</dd><dt>Rule</dt><dd>Finance — transactional (7y)</dd><dt>Hold re-check</dt><dd>At execution time</dd><dt>Second approver</dt><dd>Sara Rahman (Admin) — required</dd><dt>Output</dt><dd>Signed certificate of destruction → WORM storage; tombstones kept</dd></div><br>
+  <div class="field"><label class="f">Type DESTROY 412 to confirm</label><input class="input mono" id="cf" placeholder="DESTROY 412"></div>
+  </div><div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" onclick="if(document.getElementById('cf').value!=='DESTROY 412'){document.getElementById('cf').classList.add('err');return}closeModal();toast('Sent for second approval — certificate generated on execution')">Submit for second approval</button></div>`,'sm')}
+
+/* ---------- audit ---------- */
+const AUDIT=[
+ ['2026-10-08 11:41:07','Sara Rahman','VIEW','D-10482','MSA — Northwind Logistics','v3.0','10.4.12.88','a81f…0c2e'],
+ ['2026-10-08 11:40:52','Sara Rahman','LOGIN','—','SSO (Entra ID) + MFA','—','10.4.12.88','77d0…b913'],
+ ['2026-10-08 10:12:33','Hina Akhtar','DOWNLOAD','D-10477','Invoice INV-88213','v1.0','10.4.18.21','e2c4…5a77'],
+ ['2026-10-08 09:00:00','system','NOTIFY','D-10482','Reminder → Sara Rahman (step 2)','v3.0','—','0b6e…91d4'],
+ ['2026-10-07 18:02:19','Ayesha Khan','APPROVE','D-10482','Step 1 — Legal review','v3.0','10.4.11.40','5fd2…c38a'],
+ ['2026-10-07 16:45:01','Omar Siddiqui','WORKFLOW_START','D-10482','Contract approval','v3.0','10.4.11.17','c917…2e60'],
+ ['2026-10-07 16:42:44','Omar Siddiqui','VERSION_ADD','D-10482','v2.1 → v3.0 · 2.4 MB','v3.0','10.4.11.17','3a05…f7b1'],
+ ['2026-10-07 16:42:44','Omar Siddiqui','METADATA_EDIT','D-10482','payment_terms: Net 30 → Net 45','v3.0','10.4.11.17','98be…11cf'],
+ ['2026-10-07 11:05:10','Hina Akhtar','UPLOAD','D-10477','scan_inv_88213.tif → OCR ok (98.2%)','v1.0','10.4.18.21','f04a…6d22'],
+ ['2026-10-06 15:30:44','Faisal Qureshi','PERMISSION_CHANGE','fld:leg-lit','Contractors → explicit deny','—','10.4.9.3','6c1b…a0e8'],
+ ['2026-09-12 14:08:00','Faisal Qureshi','HOLD_PLACE','hold:LIT-2026-004','1,906 documents','—','10.4.9.3','d25e…47aa']
+];
+const ACT={VIEW:'',LOGIN:'',DOWNLOAD:'b-info',NOTIFY:'',APPROVE:'b-pos',WORKFLOW_START:'b-warn',VERSION_ADD:'b-info',METADATA_EDIT:'b-info',UPLOAD:'b-pos',PERMISSION_CHANGE:'b-danger',HOLD_PLACE:'b-danger'};
+function auditTable(rows,compact){return`<div class="card">${compact?'<div class="card-h"><h2>Activity on this document</h2><span class="chain"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>Chain intact</span></div>':''}<table><thead><tr><th>Time (UTC+5)</th><th>User</th><th>Action</th>${compact?'':'<th>Object</th>'}<th>Detail</th>${compact?'':'<th>IP</th><th>Hash</th>'}</tr></thead><tbody>
+  ${rows.map(a=>`<tr><td class="mono">${a[0]}</td><td>${a[1]}</td><td><span class="badge plain ${ACT[a[2]]}" style="font-family:var(--mono);font-size:10.5px">${a[2]}</span></td>${compact?'':`<td class="mono">${a[3]}</td>`}<td>${a[4]}</td>${compact?'':`<td class="mono">${a[6]}</td><td class="hash">${a[7]}</td>`}</tr>`).join('')}</tbody></table></div>`}
+V.audit=()=>`<div class="head"><div><h1>Audit log</h1><p class="sub">Append-only and hash-chained. Daily anchor written to WORM storage.</p></div><div class="row"><span class="chain"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>Chain verified · 1,882,410 events · 03:00 today</span><button class="btn" onclick="toast('Export queued — CSV + JSON with chain proof')">Export</button></div></div>
+  <div class="row" style="margin-bottom:14px"><input class="input" style="max-width:240px" placeholder="User"><select class="input" style="max-width:200px"><option>All actions</option><option>VIEW</option><option>DOWNLOAD</option><option>APPROVE</option><option>DELETE</option><option>PERMISSION_CHANGE</option></select><input class="input" style="max-width:200px" placeholder="Document ID or ref"><input type="date" class="input" style="max-width:170px" value="2026-09-01"><input type="date" class="input" style="max-width:170px" value="2026-10-08"></div>
+  ${auditTable(AUDIT,false)}`;
+
+/* ---------- admin ---------- */
+let adTab='roles';
+V.admin=()=>{
+  if(!can.admin())return'<div class="empty">Administration requires the Admin role.</div>';
+  const tabs=[['roles','Roles & permissions'],['meta','Metadata & document types'],['policies','Upload policies'],['templates','Folder templates'],['workflows','Workflow templates'],['security','Security']];
+  let b='';
+  const P=['Read','Download','Upload / edit','Delete','Approve','Manage permissions','Retention & holds','Audit log','System admin'];
+  const R={Admin:'111111111',['Records Mgr']:'110101110',Manager:'111110000',User:'111000000',Viewer:'100000000',Auditor:'100000010'};
+  if(adTab==='roles')b=`<div class="card"><div class="card-h"><h2>Role baseline</h2><button class="btn sm">New custom role</button></div><table class="matrix"><thead><tr><th>Capability</th>${Object.keys(R).map(r=>`<th>${r}</th>`).join('')}</tr></thead><tbody>
+    ${P.map((p,i)=>`<tr><td>${p}</td>${Object.values(R).map(v=>v[i]==='1'?'<td class="tick">✓</td>':'<td class="cross">—</td>').join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="help" style="margin-top:10px">Roles set the maximum a user can do. Folder and document ACLs then narrow it per resource — explicit deny always wins. Users and groups sync from your directory via SCIM.</p>`;
+  if(adTab==='meta')b=`<div class="grid g2" style="grid-template-columns:260px 1fr"><div class="card tree">${['Contract','Invoice','Purchase Order','Financial Report','HR Record','Policy','SOP','Correspondence','Vendor File','Inspection Record'].map((t,i)=>`<div class="${i===0?'on':''}">${svg('log')}${t}</div>`).join('')}</div>
+    <div class="card"><div class="card-h"><h2>Contract — fields</h2><button class="btn sm primary">Add field</button></div><table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Searchable</th><th>Facet</th><th>Validation</th></tr></thead><tbody>
+    ${[['Reference no.','Auto-sequence','✓','✓','—','CON-{YYYY}-{####}'],['Counterparty','Text','✓','✓','✓','—'],['Contract value','Currency','—','✓','—','≥ 0'],['Effective date','Date','✓','✓','✓','—'],['Expiry date','Date','✓','✓','✓','> Effective date'],['Department','Select','✓','✓','✓','Org list'],['Contract owner','User','✓','✓','✓','Active users'],['Classification','Select','✓','—','✓','Public · Internal · Confidential']].map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td>${[r[2],r[3],r[4]].map(c=>c==='✓'?'<td class="tick">✓</td>':'<td class="cross">—</td>').join('')}<td class="mono">${r[5]}</td></tr>`).join('')}</tbody></table></div></div>`;
+  if(adTab==='policies')b=`<div class="card"><div class="card-h"><h2>Upload policies</h2><button class="btn sm primary">New policy</button></div><table><thead><tr><th>Policy</th><th>Applied to</th><th>Allowed types</th><th>Required fields</th><th>Naming rule</th><th>Max size</th></tr></thead><tbody>
+    ${[['Contracts — strict','/Legal/Contracts','PDF, DOCX','Type, Ref no., Counterparty, Effective date','CON-YYYY-####','200 MB'],['Accounts Payable','/Finance/Accounts Payable','PDF, TIFF, JPG','Vendor, Invoice no., Amount, Invoice date','—','50 MB'],['HR restricted','/HR/*','PDF, DOCX, TIFF','Employee ID, Record type','EMP-#####','100 MB'],['Standard','Everything else','Any (virus-scanned)','Type, Department','—','5 GB']].map(r=>`<tr><td><b>${r[0]}</b></td><td class="mono">${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="mono">${r[4]}</td><td>${r[5]}</td></tr>`).join('')}</tbody></table></div>`;
+  if(adTab==='templates')b=`<div class="grid g3">${[['Department / Year / Type','Finance, Operations','{Dept}/{YYYY}/{DocType}'],['Client / Matter','Legal','{Client}/Agreements · Amendments · Correspondence · Invoices'],['Employee file','HR (restricted)','{EmpID} {Name}/Onboarding · Contracts · Reviews · Exit'],['Vendor','Procurement','{Vendor}/Onboarding · POs · Certificates · Correspondence'],['Project','Operations','{Project}/Design · Approvals · QA · Handover']].map(t=>`<div class="card card-b"><h2>${t[0]}</h2><p class="muted" style="font-size:12px;margin:4px 0 10px">${t[1]}</p><div class="mono" style="background:var(--muted);border-radius:7px;padding:9px 10px;font-size:11.5px">${t[2]}</div></div>`).join('')}</div>`;
+  if(adTab==='workflows')b=`<div class="card"><div class="card-h"><h2>Workflow templates</h2><button class="btn sm primary">New template</button></div><table><thead><tr><th>Template</th><th>Steps</th><th>Auto-start on</th><th>SLA / step</th><th>Escalation</th></tr></thead><tbody>
+    ${[['Contract approval','Legal → Finance Controller → MD','Type = Contract in /Legal','2 days','Template owner'],['Invoice sign-off','AP Clerk → Controller (> PKR 1M: + CFO)','Type = Invoice','1 day','Finance Manager'],['Policy publication','HR → Compliance','Type = Policy','3 days','HR Director'],['SOP publication','QA Lead → Ops Manager','Type = SOP','3 days','Ops Director']].map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="muted">${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join('')}</tbody></table></div>`;
+  if(adTab==='security')b=`<div class="grid g2">${[['Single sign-on','Microsoft Entra ID (OIDC) · SCIM provisioning on','b-pos','Connected'],['Multi-factor auth','Required for all users · WebAuthn + TOTP','b-pos','Enforced'],['Session policy','Idle timeout 30 min · max session 12 h','','Active'],['Encryption at rest','AES-256 · KMS key edms-prod-01 · rotated yearly','b-pos','On'],['Encryption in transit','TLS 1.3 only · HSTS preload','b-pos','On'],['IP allow-list','Office + VPN ranges for Admin role','b-info','3 ranges'],['Audit chain','Nightly verification · WORM anchor','b-pos','Verified'],['Backups','Daily + PITR 35 days · restore test Q3 passed','b-pos','Healthy']].map(s=>`<div class="card card-b row" style="align-items:flex-start"><div style="flex:1"><h2>${s[0]}</h2><p class="muted" style="font-size:12.5px;margin-top:3px">${s[1]}</p></div><span class="badge ${s[2]}">${s[3]}</span></div>`).join('')}</div>`;
+  return`<div class="head"><div><h1>Administration</h1><p class="sub">Configure structure, metadata, policies and access — no code changes needed.</p></div></div>
+  <div class="tabs">${tabs.map(t=>`<button class="${adTab===t[0]?'on':''}" onclick="adTab='${t[0]}';route()">${t[1]}</button>`).join('')}</div>${b}`;
+};
+V.api=()=>can.admin()?`<div class="head"><div><h1>API & integrations</h1><p class="sub">REST API (OpenAPI 3.1), OAuth2 clients and signed webhooks. The web app uses the same API.</p></div><button class="btn" onclick="toast('Opens Swagger UI at /docs')">Open API reference</button></div>
+  <div class="grid g2" style="margin-bottom:16px">
+    <div class="card"><div class="card-h"><h2>Connected systems</h2><button class="btn sm primary">Add client</button></div><table><tbody>
+      ${[['SAP S/4HANA','OAuth2 client credentials · documents:write workflows:read','Active · 2,114 calls today'],['Salesforce','Auth code + PKCE · search documents:read','Active · 870 calls today'],['Migration script','API key · documents:write','Expires 2026-12-31']].map(c=>`<tr><td><b>${c[0]}</b><div class="muted" style="font-size:12px">${c[1]}</div></td><td style="text-align:right"><span class="badge b-pos">${c[2]}</span></td></tr>`).join('')}</tbody></table></div>
+    <div class="card"><div class="card-h"><h2>Webhooks</h2><button class="btn sm">Add endpoint</button></div><table><tbody>
+      ${[['https://erp.internal/hooks/edms','workflow.approved, document.created','200 · 41 ms'],['https://crm.example.com/edms','version.created','200 · 112 ms'],['https://siem.internal/ingest','hold.placed, disposition.executed','200 · 18 ms']].map(w=>`<tr><td><div class="mono">${w[0]}</div><div class="muted" style="font-size:12px">${w[1]}</div></td><td style="text-align:right"><span class="badge b-pos">${w[2]}</span></td></tr>`).join('')}</tbody></table></div>
+  </div>
+  <div class="card"><div class="card-h"><h2>Example — ERP files an approved invoice</h2></div><div class="card-b"><div class="code"><span class="c"># 1. create upload and get a presigned URL (policy is checked here)</span>
+<span class="k">POST</span> /v1/uploads
+{ <span class="s">"folderId"</span>: <span class="s">"fin-ap"</span>, <span class="s">"filename"</span>: <span class="s">"INV-88213.pdf"</span>, <span class="s">"size"</span>: 831204,
+  <span class="s">"documentType"</span>: <span class="s">"Invoice"</span>,
+  <span class="s">"metadata"</span>: { <span class="s">"vendor"</span>: <span class="s">"Atlas Steel Ltd"</span>, <span class="s">"invoiceNo"</span>: <span class="s">"INV-88213"</span>, <span class="s">"amount"</span>: 4812500, <span class="s">"erpRef"</span>: <span class="s">"SAP-5100049921"</span> } }
+
+<span class="c"># 2. PUT the bytes to uploadUrl, then commit</span>
+<span class="k">POST</span> /v1/uploads/{uploadId}/complete   <span class="c">→ 201 { "documentId": "D-10477", "version": "1.0" }</span>
+
+<span class="c"># 3. EDMS calls back when the invoice is approved</span>
+<span class="k">POST</span> https://erp.internal/hooks/edms
+X-Vaultline-Signature: t=1791531005,v1=5d1e…  <span class="c"># HMAC-SHA256</span>
+{ <span class="s">"event"</span>: <span class="s">"workflow.approved"</span>, <span class="s">"documentId"</span>: <span class="s">"D-10477"</span>, <span class="s">"version"</span>: <span class="s">"1.0"</span>, <span class="s">"erpRef"</span>: <span class="s">"SAP-5100049921"</span> }</div></div></div>`:'<div class="empty">Requires the Admin role.</div>';
+
+/* ---------------- router ---------------- */
+function route(){
+  const [r,arg]=(location.hash.slice(1)||'dashboard').split('/');
+  const key=V[r]?r:'dashboard';
+  renderNav(key==='doc'?'repository':key);
+  document.getElementById('view').innerHTML=V[key](arg);
+  document.querySelectorAll('.role-write').forEach(b=>b.style.display=can.write()?'':'none');
+}
+let lastHash='';
+window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#doc/')&&!lastHash.startsWith('#doc/'))docTab=docTab||'preview';lastHash=h;route();document.getElementById('view').scrollTop=0});
+route();
+</script>

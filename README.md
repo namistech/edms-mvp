@@ -12,7 +12,7 @@ This repository is a discovery-phase deliverable produced in response to your Up
 
 | Path | What it answers from your brief |
 |---|---|
-| [`prototype/index.html`](prototype/index.html) | **Wireframes & UI/UX** — clickable prototype of every main screen. Open it in any browser, no install. |
+| [`prototype/index.html`](prototype/index.html) | **Wireframes & UI/UX** — clickable prototype of every main screen. **Live:** https://claude.ai/artifact/DpLvmCUjXBtir3PVtJaAis |
 | [`docs/01-scope-of-work.md`](docs/01-scope-of-work.md) | Clear breakdown of the full scope, mapped 1:1 to your 8 feature areas |
 | [`docs/02-ux-approach.md`](docs/02-ux-approach.md) | UI/UX design approach, screen inventory and user flows |
 | [`docs/03-architecture.md`](docs/03-architecture.md) | System architecture, components, data flow |
